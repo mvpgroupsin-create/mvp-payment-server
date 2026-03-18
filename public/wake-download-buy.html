@@ -509,7 +509,7 @@
     // ══════════════════════════════════════
     //  CONFIG
     // ══════════════════════════════════════
-    const BACKEND_URL = 'mvp-payment-server-production.up.railway.app';  // Railway URL daalo: 'https://your-app.railway.app'
+    const BACKEND_URL = '';  // Khali rakho — same server pe hai!
 
     let selectedKeyDays = 0, selectedKeyAmount = 0;
 
@@ -531,15 +531,11 @@
       document.getElementById('payLoader').classList.add('active');
       document.body.style.overflow='hidden';
 
-      if(!BACKEND_URL){
-        alert('Backend URL set nahi hai! BACKEND_URL mein Railway URL daalo.');
-        closePayQr(); return;
-      }
-
       // Backend se order create karo
+      const apiBase = BACKEND_URL || '';
       let orderData;
       try {
-        const res = await fetch(`${BACKEND_URL}/api/create-order`, {
+        const res = await fetch(`${apiBase}/api/create-order`, {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ amount, days, productType: 'key' })
@@ -570,7 +566,7 @@
         handler: async function(response){
           showVerifyingLoader();
           try {
-            const verRes = await fetch(`${BACKEND_URL}/api/verify-payment`, {
+            const verRes = await fetch(`${apiBase}/api/verify-payment`, {
               method: 'POST',
               headers: {'Content-Type':'application/json'},
               body: JSON.stringify({
