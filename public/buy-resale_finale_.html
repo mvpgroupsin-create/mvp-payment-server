@@ -1,0 +1,2593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy Resale — MVP</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --neon-blue: #00d4ff;
+      --neon-orange: #ff6b00;
+      --neon-gold: #ffd700;
+      --neon-green: #00ff88;
+      --dark-bg: #050810;
+      --card-bg: #0a0f1e;
+      --card-border: rgba(0, 212, 255, 0.15);
+      --text-primary: #e8f4ff;
+      --text-muted: #6b8aad;
+      --glow-blue: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 60px rgba(0, 212, 255, 0.15);
+      --glow-orange: 0 0 20px rgba(255, 107, 0, 0.5), 0 0 60px rgba(255, 107, 0, 0.2);
+      --glow-green: 0 0 20px rgba(0, 255, 136, 0.4), 0 0 60px rgba(0, 255, 136, 0.15);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    a,
+    button {
+      cursor: none !important;
+    }
+
+    @media(pointer:coarse) {
+      body {
+        cursor: auto !important;
+      }
+
+      .cursor,
+      .cursor-ring {
+        display: none !important;
+      }
+
+      a,
+      button {
+        cursor: pointer !important;
+      }
+    }
+
+    /* CURSOR */
+    .cursor {
+      width: 12px;
+      height: 12px;
+      background: var(--neon-blue);
+      border-radius: 50%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-50%, -50%);
+      transition: transform .1s;
+      box-shadow: 0 0 10px var(--neon-blue), 0 0 30px rgba(0, 212, 255, .5);
+    }
+
+    .cursor-ring {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid rgba(0, 212, 255, .5);
+      border-radius: 50%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 99998;
+      transform: translate(-50%, -50%);
+      transition: transform .15s, width .2s, height .2s;
+    }
+
+    /* PARTICLES */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      height: 70px;
+      background: rgba(5, 8, 16, .93);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 212, 255, .1);
+      animation: slideDown .8s ease forwards;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      -webkit-text-fill-color: var(--neon-orange);
+    }
+
+    .menu-btn {
+      font-size: 28px;
+      background: none;
+      border: none;
+      color: var(--neon-blue);
+      line-height: 1;
+      transition: color .3s;
+    }
+
+    .menu-btn:hover {
+      color: var(--neon-green);
+    }
+
+    /* SIDENAV */
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0;
+      right: 0;
+      background: rgba(5, 8, 20, .98);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid rgba(0, 212, 255, .15);
+      overflow-x: hidden;
+      transition: .4s;
+      padding-top: 60px;
+      z-index: 2000;
+    }
+
+    .sidenav a {
+      display: block;
+      padding: 14px 28px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color .2s, background .2s, padding-left .2s;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+    }
+
+    .sidenav a:hover {
+      color: var(--neon-blue);
+      background: rgba(0, 212, 255, .06);
+      padding-left: 36px;
+    }
+
+    .sidenav a.active-page {
+      color: var(--neon-blue) !important;
+      border-left: 3px solid var(--neon-blue);
+      background: rgba(0, 212, 255, .06);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 30px;
+      color: var(--text-muted) !important;
+      border-bottom: none !important;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
+      padding: 8px 12px !important;
+    }
+
+    .close-btn:hover {
+      color: var(--neon-blue) !important;
+      background: none !important;
+      padding-left: 12px !important;
+    }
+
+    .sidenav .side-cta {
+      margin: 1rem 1.5rem 0;
+      background: linear-gradient(135deg, var(--neon-blue), #0088cc);
+      color: #000 !important;
+      border-radius: 6px;
+      text-align: center;
+      padding: 12px 20px !important;
+      font-weight: 700 !important;
+      font-family: 'Orbitron', monospace !important;
+      font-size: .8rem !important;
+      border-bottom: none !important;
+      -webkit-text-fill-color: #000 !important;
+      transition: box-shadow .3s, transform .2s !important;
+    }
+
+    .sidenav .side-cta:hover {
+      box-shadow: var(--glow-blue);
+      transform: translateY(-2px);
+      padding-left: 20px !important;
+    }
+
+    #submenu {
+      display: none;
+    }
+
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .5);
+      z-index: 1999;
+    }
+
+    .nav-overlay.active {
+      display: block;
+    }
+
+    /* PAGE */
+    .page {
+      position: relative;
+      z-index: 1;
+      padding-top: 70px;
+      min-height: 100vh;
+    }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      min-height: 290px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 70px 5% 50px;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0, 60, 120, .4) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 15% 80%, rgba(255, 107, 0, .08) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 85% 20%, rgba(0, 255, 136, .06) 0%, transparent 60%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(0, 212, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, .04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      from {
+        transform: perspective(500px) rotateX(30deg) translateY(0)
+      }
+
+      to {
+        transform: perspective(500px) rotateX(30deg) translateY(60px)
+      }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 212, 255, .08);
+      border: 1px solid rgba(0, 212, 255, .25);
+      padding: 6px 18px;
+      border-radius: 50px;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--neon-blue);
+      margin-bottom: 1.2rem;
+      animation: fadeUp .8s .2s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 136, .5)
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(0, 255, 136, 0)
+      }
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.8rem, 5.5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      margin-bottom: .8rem;
+      animation: fadeUp .8s .35s ease both;
+    }
+
+    .line1 {
+      display: block;
+      color: var(--text-primary);
+    }
+
+    .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--neon-blue) 0%, var(--neon-green) 50%, var(--neon-blue) 100%);
+      background-size: 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 0%
+      }
+
+      100% {
+        background-position: 200%
+      }
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 460px;
+      line-height: 1.7;
+      animation: fadeUp .8s .5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        transform: translateY(28px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    /* SELLER SECTION */
+    .seller-section {
+      padding: 50px 5% 100px;
+    }
+
+    .seller-wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    /* STEP BREADCRUMB */
+    .step-trail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      font-size: .82rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+    }
+
+    .step-crumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 212, 255, .18);
+      background: rgba(0, 212, 255, .05);
+      color: var(--text-muted);
+      transition: all .2s;
+    }
+
+    .step-crumb.done {
+      border-color: rgba(0, 255, 136, .4);
+      background: rgba(0, 255, 136, .07);
+      color: var(--neon-green);
+    }
+
+    .step-crumb.active {
+      border-color: var(--neon-blue);
+      background: rgba(0, 212, 255, .12);
+      color: var(--neon-blue);
+      box-shadow: 0 0 12px rgba(0, 212, 255, .15);
+    }
+
+    .step-arrow {
+      color: rgba(255, 255, 255, .15);
+      font-size: .75rem;
+    }
+
+    /* STEP HEADING */
+    .step-heading {
+      font-family: 'Orbitron', monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(0, 212, 255, .1);
+    }
+
+    /* GAME CARDS */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media(max-width:640px) {
+      .game-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .game-card {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      background: var(--card-bg);
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+      animation: fadeUp .5s ease both;
+    }
+
+    .game-card:hover {
+      transform: translateY(-7px) scale(1.02);
+    }
+
+    .game-card.bgmi {
+      border-color: rgba(255, 107, 0, .2);
+    }
+
+    .game-card.bgmi:hover {
+      box-shadow: 0 20px 50px rgba(255, 107, 0, .28);
+      border-color: rgba(255, 107, 0, .6);
+    }
+
+    .game-card.pubg {
+      border-color: rgba(0, 212, 255, .2);
+    }
+
+    .game-card.pubg:hover {
+      box-shadow: 0 20px 50px rgba(0, 212, 255, .28);
+      border-color: rgba(0, 212, 255, .6);
+    }
+
+    .game-card.pool {
+      border-color: rgba(0, 255, 136, .2);
+    }
+
+    .game-card.pool:hover {
+      box-shadow: 0 20px 50px rgba(0, 255, 136, .28);
+      border-color: rgba(0, 255, 136, .6);
+    }
+
+    .game-art {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .art-bgmi {
+      background: linear-gradient(160deg, #1a0800, #3d1000, #1a0800);
+    }
+
+    .art-bgmi::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(255, 107, 0, .45) 0%, transparent 60%);
+    }
+
+    .art-pubg {
+      background: linear-gradient(160deg, #001525, #002a45, #001525);
+    }
+
+    .art-pubg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(0, 212, 255, .35) 0%, transparent 60%);
+    }
+
+    .art-pool {
+      background: linear-gradient(160deg, #001500, #002800, #001500);
+    }
+
+    .art-pool::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0, 255, 136, .25) 0%, transparent 60%);
+    }
+
+    .game-emoji {
+      font-size: 3.5rem;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 14px rgba(255, 255, 255, .3));
+      animation: floatY 4s ease-in-out infinite;
+    }
+
+    @keyframes floatY {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-10px)
+      }
+    }
+
+    .game-body {
+      padding: 1rem 1.2rem 1.3rem;
+    }
+
+    .game-name {
+      font-family: 'Orbitron', monospace;
+      font-size: .9rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: .3rem;
+    }
+
+    .game-name.o {
+      color: var(--neon-orange);
+    }
+
+    .game-name.b {
+      color: var(--neon-blue);
+    }
+
+    .game-name.g {
+      color: var(--neon-green);
+    }
+
+    .game-sub {
+      font-size: .78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: .9rem;
+    }
+
+    .pick-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Orbitron', monospace;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: transform .18s, box-shadow .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pick-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255, 255, 255, .15), transparent);
+      transform: translateX(-100%);
+      transition: transform .5s;
+    }
+
+    .pick-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .pick-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-o {
+      background: linear-gradient(135deg, var(--neon-orange), #cc4400);
+      color: #fff;
+      -webkit-text-fill-color: #fff;
+    }
+
+    .btn-o:hover {
+      box-shadow: var(--glow-orange);
+    }
+
+    .btn-b {
+      background: linear-gradient(135deg, var(--neon-blue), #0055cc);
+      color: #000;
+      -webkit-text-fill-color: #000;
+    }
+
+    .btn-b:hover {
+      box-shadow: var(--glow-blue);
+    }
+
+    .btn-g {
+      background: linear-gradient(135deg, var(--neon-green), #00aa55);
+      color: #000;
+      -webkit-text-fill-color: #000;
+    }
+
+    .btn-g:hover {
+      box-shadow: var(--glow-green);
+    }
+
+    /* COUNTRY GRID */
+    .country-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .8rem;
+      margin-bottom: 1.8rem;
+    }
+
+    @media(max-width:700px) {
+      .country-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media(max-width:400px) {
+      .country-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .country-card {
+      background: var(--card-bg);
+      border: 1.5px solid rgba(0, 212, 255, .12);
+      border-radius: 14px;
+      padding: 1.2rem .8rem;
+      text-align: center;
+      transition: all .22s;
+      animation: fadeUp .4s ease both;
+    }
+
+    .country-card:hover {
+      border-color: rgba(0, 212, 255, .5);
+      background: rgba(0, 212, 255, .07);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 212, 255, .12);
+    }
+
+    .country-card.active {
+      border-color: var(--neon-blue);
+      background: rgba(0, 212, 255, .13);
+      transform: translateY(-5px);
+      box-shadow: 0 0 22px rgba(0, 212, 255, .22);
+    }
+
+    .flag {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: .5rem;
+    }
+
+    .cname {
+      font-family: 'Orbitron', monospace;
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+
+    .country-card:hover .cname,
+    .country-card.active .cname {
+      color: var(--neon-blue);
+    }
+
+    /* BACK BUTTONS */
+    .back-row {
+      display: flex;
+      gap: .8rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Orbitron', monospace;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: transform .18s, box-shadow .25s;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* SELLER PANEL */
+    .seller-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      animation: panelIn .38s cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(.97)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    .panel-header {
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid rgba(0, 212, 255, .08);
+      background: rgba(0, 212, 255, .04);
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      font-family: 'Orbitron', monospace;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--neon-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-meta {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+
+    .ptag {
+      font-family: 'Orbitron', monospace;
+      font-size: .68rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+    }
+
+    .ptag.b {
+      background: rgba(0, 212, 255, .12);
+      color: var(--neon-blue);
+    }
+
+    .ptag.o {
+      background: rgba(255, 107, 0, .12);
+      color: var(--neon-orange);
+    }
+
+    .ptag.g {
+      background: rgba(0, 255, 136, .12);
+      color: var(--neon-green);
+    }
+
+    /* SELLER ROW */
+    .seller-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      transition: background .2s;
+      animation: rowIn .3s ease both;
+    }
+
+    .seller-row:last-child {
+      border-bottom: none;
+    }
+
+    .seller-row:hover {
+      background: rgba(0, 212, 255, .04);
+    }
+
+    @keyframes rowIn {
+      from {
+        opacity: 0;
+        transform: translateX(-14px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    .sleft {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sav {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: .85rem;
+      font-weight: 900;
+      color: #000;
+    }
+
+    .sinfo {
+      min-width: 0;
+    }
+
+    .sname {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .smeta {
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .bv {
+      background: rgba(0, 255, 136, .12);
+      color: var(--neon-green);
+      font-size: .63rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .bt {
+      background: rgba(255, 215, 0, .12);
+      color: var(--neon-gold);
+      font-size: .63rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .sbtns {
+      display: flex;
+      gap: .5rem;
+      flex-shrink: 0;
+    }
+
+    .sbtn {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1.5px solid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: transform .18s, box-shadow .22s, border-color .2s;
+    }
+
+    .sbtn:hover {
+      transform: translateY(-3px) scale(1.1);
+    }
+
+    .sbtn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      pointer-events: none;
+    }
+
+    .sbtn.tg {
+      border-color: rgba(42, 171, 238, .35);
+      background: rgba(42, 171, 238, .08);
+      color: #2aabee;
+    }
+
+    .sbtn.tg:hover {
+      box-shadow: 0 0 16px rgba(42, 171, 238, .5);
+      border-color: #2aabee;
+    }
+
+    .sbtn.wa {
+      border-color: rgba(37, 211, 102, .35);
+      background: rgba(37, 211, 102, .08);
+      color: #25d366;
+    }
+
+    .sbtn.wa:hover {
+      box-shadow: 0 0 16px rgba(37, 211, 102, .5);
+      border-color: #25d366;
+    }
+
+    .sbtn.dc {
+      border-color: rgba(88, 101, 242, .35);
+      background: rgba(88, 101, 242, .08);
+      color: #5865f2;
+    }
+
+    .sbtn.dc:hover {
+      box-shadow: 0 0 16px rgba(88, 101, 242, .5);
+      border-color: #5865f2;
+    }
+
+    /* EMPTY */
+    .seller-empty {
+      padding: 3.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .seller-empty-icon {
+      font-size: 2.8rem;
+      margin-bottom: .8rem;
+    }
+
+    .seller-empty p {
+      font-size: .95rem;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 45px 5% 28px;
+      border-top: 1px solid rgba(255, 255, 255, .07);
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2.5rem;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .footer-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      margin-bottom: .5rem;
+    }
+
+    .footer-logo span {
+      -webkit-text-fill-color: var(--neon-orange);
+    }
+
+    .footer-desc {
+      color: var(--text-muted);
+      font-size: .88rem;
+      line-height: 1.65;
+      max-width: 220px;
+    }
+
+    .fcol h4 {
+      font-family: 'Orbitron', monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: .9rem;
+      color: var(--neon-blue);
+    }
+
+    .fcol ul {
+      list-style: none;
+    }
+
+    .fcol li {
+      margin-bottom: .45rem;
+    }
+
+    .fcol a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: .88rem;
+      transition: color .2s;
+    }
+
+    .fcol a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, .05);
+      padding-top: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .8rem;
+    }
+
+    .footer-copy {
+      color: var(--text-muted);
+      font-size: .8rem;
+    }
+
+    .footer-tags {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .ftag {
+      font-size: .66rem;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, .05);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    /* REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ══════════════════════════════════════
+       BECOME A SELLER — FLOATING BUTTON & MODALS
+       ══════════════════════════════════════ */
+    @keyframes bsFloatBtn { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    @keyframes bsFadeIn    { from{opacity:0} to{opacity:1} }
+    @keyframes bsModalSlide{ from{transform:scale(0.85) translateY(30px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+    @keyframes bsSuccessPop{ 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+    @keyframes bsSpin       { to{transform:rotate(360deg)} }
+    @keyframes bsQrGlow     { 0%,100%{box-shadow:0 0 20px rgba(0,212,255,0.2)} 50%{box-shadow:0 0 40px rgba(0,212,255,0.5)} }
+    @keyframes psTilt       { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+    @keyframes psScan       { 0%,100%{transform:translateY(0);opacity:1} 50%{transform:translateY(36px);opacity:0.4} }
+    @keyframes psFloat      { 0%{transform:translateY(0);opacity:0.7} 100%{transform:translateY(-55px);opacity:0} }
+
+    /* Float button */
+    .float-seller-btn {
+      position:fixed;bottom:2rem;left:2rem;z-index:8999;
+      background:linear-gradient(135deg,#00ff88,#00aa55);
+      color:#000;border:none;padding:14px 22px;border-radius:50px;
+      font-family:'Orbitron',monospace;font-size:0.78rem;font-weight:900;
+      letter-spacing:1.5px;cursor:pointer !important;display:flex;align-items:center;gap:8px;
+      box-shadow:0 0 25px rgba(0,255,136,0.4),0 8px 25px rgba(0,0,0,0.4);
+      animation:bsFloatBtn 3s ease-in-out infinite;
+    }
+    .float-seller-btn:hover{box-shadow:0 0 40px rgba(0,255,136,0.7);}
+
+    /* Overlays */
+    .bs-overlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:1rem;}
+    .bs-overlay.active{display:flex;animation:bsFadeIn 0.3s ease;}
+
+    /* Plan modal */
+    .bs-modal{background:#0a0f1e;border:1px solid rgba(0,255,136,0.25);border-radius:22px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;animation:bsModalSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);padding:0.6rem 1.8rem 1.8rem;position:relative;}
+    .bs-modal-close{position:absolute;top:0.9rem;right:0.9rem;background:rgba(255,40,40,0.08);border:1.5px solid rgba(255,80,80,0.45);color:#ff6b6b;width:32px;height:32px;border-radius:50%;font-size:0.95rem;display:flex;align-items:center;justify-content:center;cursor:pointer !important;transition:all 0.25s;z-index:10;}
+    .bs-modal-close:hover{background:rgba(255,80,80,0.22);box-shadow:0 0 16px rgba(255,80,80,0.5);}
+    .bs-modal-back{position:absolute;top:0.9rem;left:0.9rem;background:rgba(0,212,255,0.08);border:1.5px solid rgba(0,212,255,0.5);color:#00d4ff;width:32px;height:32px;border-radius:50%;font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer !important;transition:all 0.25s;z-index:10;}
+    .bs-modal-back:hover{background:rgba(0,212,255,0.18);box-shadow:0 0 18px rgba(0,212,255,0.55);}
+    .bs-title{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,#00ff88,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.3rem;margin-top:2.4rem;}
+    .bs-sub{color:#6b8aad;font-size:0.88rem;margin-bottom:1.5rem;line-height:1.5;}
+
+    /* Live rate badge */
+    .bs-rate-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);color:#ffd700;font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:50px;margin-bottom:1.2rem;letter-spacing:0.5px;}
+
+    /* Plan cards grid */
+    .bs-plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin-bottom:1.4rem;}
+    .bs-plan-card{background:rgba(255,255,255,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:16px;padding:1.2rem 1rem;cursor:pointer !important;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden;}
+    .bs-plan-card:hover{background:rgba(0,255,136,0.07);border-color:rgba(0,255,136,0.5);transform:scale(1.04) translateY(-4px);box-shadow:0 14px 36px rgba(0,255,136,0.12);}
+    .bs-plan-card.popular::before{content:'POPULAR';position:absolute;top:-1px;right:-1px;background:#00d4ff;color:#000;font-size:0.48rem;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:0 16px 0 8px;}
+    .bs-plan-card.best::before{content:'BEST VALUE';position:absolute;top:-1px;right:-1px;background:#ffd700;color:#000;font-size:0.48rem;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:0 16px 0 8px;}
+    .bs-inr-range{font-family:'Orbitron',monospace;font-size:1.05rem;font-weight:900;color:#00ff88;display:block;margin-bottom:0.25rem;letter-spacing:-0.5px;}
+    .bs-inr-lbl{font-size:0.62rem;color:#6b8aad;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:0.7rem;}
+    .bs-usdt-row{display:flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;color:#aac;}
+    .bs-usdt-val{font-family:'Orbitron',monospace;font-size:0.8rem;color:#ffd700;font-weight:700;}
+    .bs-usdt-ico{font-size:0.75rem;opacity:0.7;}
+    .bs-info-bar{padding:0.9rem 1rem;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.1);border-radius:12px;font-size:0.8rem;color:#6b8aad;line-height:1.6;}
+
+    /* QR Payment Modal */
+    .bs-qr-overlay{position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:1rem;}
+    .bs-qr-overlay.active{display:flex;animation:bsFadeIn 0.3s ease;}
+    .bs-qr-modal{background:#0a0f1e;border:1px solid rgba(0,212,255,0.25);border-radius:22px;width:100%;max-width:440px;animation:bsModalSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);padding:0.6rem 1.6rem 1.6rem;position:relative;text-align:center;}
+    .bs-qr-title{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;color:#00d4ff;margin-bottom:0.3rem;margin-top:2.2rem;}
+    .bs-qr-sub{color:#6b8aad;font-size:0.85rem;margin-bottom:1.3rem;}
+    .bs-amount-tag{display:inline-block;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;padding:6px 20px;border-radius:50px;margin-bottom:1.2rem;}
+    .bs-qr-wrap{display:inline-block;background:#fff;padding:12px;border-radius:14px;margin:0 auto 1.2rem;animation:bsQrGlow 2s ease-in-out infinite;}
+    .bs-upi-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:1.2rem;}
+    .bs-upi-tag{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);color:#00d4ff;font-size:0.85rem;font-weight:600;padding:6px 14px;border-radius:8px;}
+    .bs-pay-methods{display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.3rem;}
+    .bs-pay-app-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);padding:7px;border-radius:10px;cursor:pointer !important;transition:all 0.2s;display:flex;align-items:center;justify-content:center;min-width:48px;min-height:44px;}
+    .bs-pay-app-btn:hover{background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.3);}
+    .bs-pay-app-btn.selected{background:rgba(0,212,255,0.12);border-color:#00d4ff;}
+    .bs-pay-app-btn .app-logo{display:block;width:30px;height:30px;background-size:contain;background-repeat:no-repeat;background-position:center;}
+    .bs-verify-btn{width:100%;background:linear-gradient(135deg,#00ff88,#00aa55);color:#000;border:none;padding:14px;border-radius:12px;font-family:'Orbitron',monospace;font-size:0.88rem;font-weight:900;letter-spacing:2px;cursor:pointer !important;transition:box-shadow 0.3s,transform 0.2s;margin-bottom:0.8rem;}
+    .bs-verify-btn:hover{box-shadow:0 0 30px rgba(0,255,136,0.5);transform:translateY(-2px);}
+    .bs-pay-note{color:#6b8aad;font-size:0.75rem;}
+    .bs-loader{display:none;flex-direction:column;align-items:center;gap:1rem;padding:2rem 0;}
+    .bs-loader.active{display:flex;}
+    .bs-spin-ring{width:60px;height:60px;border-radius:50%;border:3px solid rgba(0,212,255,0.1);border-top-color:#00d4ff;animation:bsSpin 0.8s linear infinite;}
+    .bs-loader-txt{color:#6b8aad;font-size:0.9rem;font-family:'Orbitron',monospace;font-weight:600;letter-spacing:1px;}
+
+    /* Success overlay */
+    .bs-success-overlay{position:fixed;inset:0;z-index:10002;background:rgba(0,0,0,0.92);backdrop-filter:blur(15px);display:none;align-items:center;justify-content:center;}
+    .bs-success-overlay.active{display:flex;animation:bsFadeIn 0.3s ease;}
+    .bs-success-box{background:#0a0f1e;border:1px solid rgba(0,255,136,0.3);border-radius:22px;padding:3rem 2.5rem;text-align:center;max-width:360px;width:100%;animation:bsModalSlide 0.5s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden;}
+    .bs-success-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:80%;height:2px;background:linear-gradient(90deg,transparent,#00ff88,transparent);}
+    .bs-success-ring{width:90px;height:90px;border-radius:50%;background:rgba(0,255,136,0.1);border:2px solid #00ff88;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.5rem;box-shadow:0 0 30px rgba(0,255,136,0.3);animation:bsSuccessPop 0.5s 0.1s ease both;}
+    .bs-success-title{font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;color:#00ff88;margin-bottom:0.4rem;}
+    .bs-success-sub{color:#6b8aad;font-size:0.9rem;}
+
+    /* Referral Code Display Modal */
+    .bs-ref-overlay{position:fixed;inset:0;z-index:10003;background:rgba(0,0,0,0.92);backdrop-filter:blur(15px);display:none;align-items:center;justify-content:center;padding:1rem;}
+    .bs-ref-overlay.active{display:flex;animation:bsFadeIn 0.3s ease;}
+    .bs-ref-box{background:#0a0f1e;border:1px solid rgba(0,255,136,0.3);border-radius:22px;padding:2.5rem;text-align:center;max-width:420px;width:100%;animation:bsModalSlide 0.5s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden;}
+    .bs-ref-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:80%;height:2px;background:linear-gradient(90deg,transparent,#00ff88,transparent);}
+    .bs-ref-icon{width:80px;height:80px;border-radius:50%;background:rgba(0,255,136,0.1);border:2px solid #00ff88;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:2rem;box-shadow:0 0 30px rgba(0,255,136,0.25);animation:bsSuccessPop 0.5s 0.1s ease both;}
+    .bs-ref-title{font-family:'Orbitron',monospace;font-size:1.15rem;font-weight:900;color:#00ff88;margin-bottom:0.3rem;}
+    .bs-ref-sub{color:#6b8aad;font-size:0.82rem;margin-bottom:1.6rem;}
+    .bs-ref-display{background:rgba(0,0,0,0.4);border:1px solid rgba(0,255,136,0.35);border-radius:12px;padding:1rem 1.2rem;font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:#00ff88;letter-spacing:4px;margin-bottom:1rem;word-break:break-all;text-shadow:0 0 15px rgba(0,255,136,0.4);}
+    .bs-copy-btn{width:100%;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;padding:12px;border-radius:10px;font-family:'Orbitron',monospace;font-size:0.82rem;font-weight:700;letter-spacing:1px;cursor:pointer !important;transition:all 0.2s;margin-bottom:0.8rem;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .bs-copy-btn:hover{background:rgba(0,255,136,0.2);box-shadow:0 0 20px rgba(0,255,136,0.2);}
+    .bs-copy-btn.copied{background:rgba(0,212,255,0.15);border-color:rgba(0,212,255,0.4);color:#00d4ff;}
+    .bs-close-btn{width:100%;background:linear-gradient(135deg,#00d4ff,#0066cc);color:#000;border:none;padding:13px;border-radius:10px;font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:900;letter-spacing:2px;cursor:pointer !important;transition:box-shadow 0.3s,transform 0.2s;}
+    .bs-close-btn:hover{box-shadow:0 0 20px rgba(0,212,255,0.4);transform:translateY(-2px);}
+
+    /* UPI App logos shared */
+    .logo-phonepe{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%235f259f'/%3E%3Ctext x='24' y='33' text-anchor='middle' font-size='22' font-family='Arial' font-weight='bold' fill='white'%3EPe%3C/text%3E%3C/svg%3E");}
+    .logo-gpay{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='white'/%3E%3Ctext x='14' y='32' font-size='22' font-family='Arial' font-weight='bold' fill='%234285F4'%3EG%3C/text%3E%3Ctext x='28' y='32' font-size='13' font-family='Arial' font-weight='bold' fill='%23555'%3EPay%3C/text%3E%3C/svg%3E");}
+    .logo-bhim{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23002A6C'/%3E%3Ctext x='24' y='30' text-anchor='middle' font-size='14' font-family='Arial' font-weight='900' fill='%23FF9933'%3EBHIM%3C/text%3E%3Crect x='4' y='33' width='40' height='3' fill='%23FF9933'/%3E%3Crect x='4' y='36' width='40' height='3' fill='white'/%3E%3Crect x='4' y='39' width='40' height='3' fill='%23138808'/%3E%3C/svg%3E");}
+    .logo-paytm{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%2300BAF2'/%3E%3Ctext x='24' y='28' text-anchor='middle' font-size='11' font-family='Arial' font-weight='bold' fill='%23002970'%3Epaytm%3C/text%3E%3Crect x='8' y='30' width='32' height='3' rx='2' fill='%23002970'/%3E%3C/svg%3E");}
+    .logo-navi{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%2300C48C'/%3E%3Ctext x='24' y='31' text-anchor='middle' font-size='17' font-family='Arial' font-weight='900' fill='white'%3ENavi%3C/text%3E%3C/svg%3E");}
+    .logo-other{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23222'/%3E%3Ctext x='24' y='21' text-anchor='middle' font-size='9' font-family='Arial' fill='%23aaa'%3EOTHER%3C/text%3E%3Ctext x='24' y='34' text-anchor='middle' font-size='10' font-family='Arial' font-weight='bold' fill='%2300d4ff'%3EAPPS%3C/text%3E%3C/svg%3E");}
+    @media(pointer:coarse){
+      .float-seller-btn,.bs-modal-close,.bs-modal-back,.bs-plan-card,.bs-pay-app-btn,.bs-verify-btn,.bs-copy-btn,.bs-close-btn { cursor:pointer !important; }
+    }
+    /* ══ BS GAME SELECTOR CARDS ══ */
+    .bs-game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:0.5rem;}
+    @media(max-width:580px){.bs-game-grid{grid-template-columns:1fr;}}
+    .bs-game-card{border-radius:16px;overflow:hidden;border:2px solid transparent;background:#0a0f1e;transition:transform .3s,box-shadow .3s,border-color .3s;cursor:pointer !important;}
+    .bs-gc-bgmi{border-color:rgba(255,107,0,0.2);}
+    .bs-gc-bgmi:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 50px rgba(255,107,0,0.28);border-color:rgba(255,107,0,0.6);}
+    .bs-gc-pubg{border-color:rgba(0,212,255,0.2);}
+    .bs-gc-pubg:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 50px rgba(0,212,255,0.28);border-color:rgba(0,212,255,0.6);}
+    .bs-gc-pool{border-color:rgba(0,255,136,0.2);}
+    .bs-gc-pool:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 50px rgba(0,255,136,0.28);border-color:rgba(0,255,136,0.6);}
+    .bs-gc-art{height:90px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .bs-gc-art-bgmi{background:linear-gradient(160deg,#1a0800,#3d1000,#1a0800);}
+    .bs-gc-art-bgmi::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(255,107,0,0.45) 0%,transparent 60%);}
+    .bs-gc-art-pubg{background:linear-gradient(160deg,#001525,#002a45,#001525);}
+    .bs-gc-art-pubg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(0,212,255,0.35) 0%,transparent 60%);}
+    .bs-gc-art-pool{background:linear-gradient(160deg,#001500,#002800,#001500);}
+    .bs-gc-art-pool::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,255,136,0.25) 0%,transparent 60%);}
+    .bs-gc-emoji{font-size:2.6rem;position:relative;z-index:1;filter:drop-shadow(0 0 10px rgba(255,255,255,.3));animation:bsGcFloat 4s ease-in-out infinite;}
+    @keyframes bsGcFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    .bs-gc-body{padding:0.85rem 1rem 1rem;}
+    .bs-gc-name{font-family:'Orbitron',monospace;font-size:0.82rem;font-weight:800;letter-spacing:1px;margin-bottom:0.25rem;}
+    .bs-gc-sub{font-size:0.7rem;color:#6b8aad;line-height:1.5;margin-bottom:0.75rem;}
+    .bs-gc-btn{display:block;text-align:center;padding:8px 10px;border-radius:8px;font-family:'Orbitron',monospace;font-size:0.62rem;font-weight:800;letter-spacing:1px;border:none;cursor:pointer !important;transition:box-shadow .2s,transform .15s;}
+    .bs-gc-btn-o{background:linear-gradient(135deg,#ff6b00,#ff9500);color:#000;}
+    .bs-gc-btn-o:hover{box-shadow:0 0 18px rgba(255,107,0,0.5);}
+    .bs-gc-btn-b{background:linear-gradient(135deg,#00d4ff,#0055cc);color:#000;}
+    .bs-gc-btn-b:hover{box-shadow:0 0 18px rgba(0,212,255,0.5);}
+    .bs-gc-btn-g{background:linear-gradient(135deg,#00ff88,#00aa55);color:#000;}
+    .bs-gc-btn-g:hover{box-shadow:0 0 18px rgba(0,255,136,0.5);}
+    /* ══ PLAN OVERLAY ══ */
+    .bs-plan-overlay{position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;}
+    .bs-plan-overlay.active{display:flex;animation:bsFadeIn 0.3s ease;}
+    /* ══ REGISTER FORM MODAL ══ */
+    .bs-reg-overlay{position:fixed;inset:0;z-index:10004;background:rgba(0,0,0,0.93);backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;}
+    .bs-reg-overlay.active{display:flex;animation:bsFadeIn 0.3s ease;}
+    .bs-reg-modal{background:#0a0f1e;border:1px solid rgba(0,212,255,0.25);border-radius:22px;width:100%;max-width:520px;animation:bsModalSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);padding:0.6rem 2rem 2rem;position:relative;margin:auto;}
+    .bs-reg-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00d4ff,#00ff88,transparent);border-radius:22px 22px 0 0;}
+    .bs-reg-title{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:900;background:linear-gradient(135deg,#00d4ff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.25rem;margin-top:2.4rem;}
+    .bs-reg-sub{color:#6b8aad;font-size:0.85rem;margin-bottom:1.6rem;line-height:1.55;}
+    .bs-reg-refcode{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.25);color:#00ff88;font-family:'Orbitron',monospace;font-size:0.8rem;font-weight:700;padding:5px 14px;border-radius:50px;margin-bottom:1.4rem;letter-spacing:1px;}
+    /* field styles scoped to reg modal */
+    .bs-reg-modal .rfield-row{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;}
+    @media(max-width:480px){.bs-reg-modal .rfield-row{grid-template-columns:1fr;}}
+    .bs-reg-modal .rfield-group{margin-bottom:1.1rem;}
+    .bs-reg-modal .rfield-label{font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b8aad;margin-bottom:0.45rem;display:block;}
+    .bs-reg-modal .rfield-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,212,255,0.15);border-radius:10px;padding:11px 14px;color:#e8f4ff;font-family:'Rajdhani',sans-serif;font-size:0.97rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box;}
+    .bs-reg-modal .rfield-input:focus{border-color:#00d4ff;box-shadow:0 0 0 3px rgba(0,212,255,0.1);}
+    .bs-reg-modal .rfield-input::placeholder{color:#6b8aad;}
+    .bs-reg-modal textarea.rfield-input{resize:vertical;min-height:110px;}
+    .bs-reg-modal .rcat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;}
+    .bs-reg-modal .rcat-btn{background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.12);border-radius:8px;padding:9px 8px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:0.83rem;font-weight:600;color:#6b8aad;transition:all 0.2s;letter-spacing:0.5px;cursor:pointer !important;}
+    .bs-reg-modal .rcat-btn:hover,.bs-reg-modal .rcat-btn.selected{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,0.08);box-shadow:0 0 10px rgba(0,212,255,0.12);}
+    .bs-reg-submit{width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,#00d4ff,#0055cc);color:#000;font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:900;letter-spacing:2px;cursor:pointer !important;transition:transform 0.2s,box-shadow 0.3s;margin-top:0.4rem;position:relative;overflow:hidden;}
+    .bs-reg-submit::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.18),transparent);transform:translateX(-100%);transition:transform 0.5s;}
+    .bs-reg-submit:hover::before{transform:translateX(100%);}
+    .bs-reg-submit:hover{transform:translateY(-2px);box-shadow:0 0 25px rgba(0,212,255,0.45);}
+    .bs-reg-submit:disabled{opacity:0.6;transform:none;}
+    /* success sent state */
+    .bs-reg-sent{display:none;flex-direction:column;align-items:center;text-align:center;padding:2rem 0 1rem;}
+    .bs-reg-sent.active{display:flex;}
+    .bs-reg-sent-ring{width:80px;height:80px;border-radius:50%;background:rgba(0,255,136,0.1);border:2px solid #00ff88;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 1.2rem;box-shadow:0 0 30px rgba(0,255,136,0.25);animation:bsSuccessPop 0.5s ease both;}
+    .bs-reg-sent-title{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;color:#00ff88;margin-bottom:0.4rem;}
+    .bs-reg-sent-sub{color:#6b8aad;font-size:0.88rem;line-height:1.6;margin-bottom:1.6rem;}
+    .bs-reg-done-btn{background:linear-gradient(135deg,#00ff88,#00aa55);color:#000;border:none;padding:13px 30px;border-radius:10px;font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:900;letter-spacing:2px;cursor:pointer !important;transition:box-shadow 0.3s,transform 0.2s;}
+    .bs-reg-done-btn:hover{box-shadow:0 0 20px rgba(0,255,136,0.4);transform:translateY(-2px);}
+    /* Photo upload */
+    .bs-upload-label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:1.2rem;border:2px dashed rgba(0,212,255,0.25);border-radius:12px;cursor:pointer !important;transition:all 0.2s;background:rgba(255,255,255,0.02);text-align:center;}
+    .bs-upload-label:hover{border-color:rgba(0,212,255,0.6);background:rgba(0,212,255,0.05);}
+    .bs-upload-label.has-file{border-color:rgba(0,255,136,0.5);background:rgba(0,255,136,0.04);}
+    .bs-upload-icon{font-size:1.8rem;}
+    .bs-upload-text{font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:700;color:#00d4ff;letter-spacing:1px;}
+    .bs-upload-hint{font-size:0.68rem;color:#6b8aad;}
+  </style>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <a class="nav-logo" href="index.html">M<span>V</span>P</a>
+    <button class="menu-btn" onclick="openNav()" aria-label="Open menu">☰</button>
+  </div>
+  <div class="nav-overlay" id="navOverlay" onclick="closeNav()"></div>
+  <div id="myMenu" class="sidenav">
+    <h2
+      style="color:#0066ff;text-align:center;padding:0 1rem;font-family:'Orbitron',monospace;font-size:.85rem;letter-spacing:2px;margin-top:.5rem;">
+      MENU</h2>
+    <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">✕</a>
+    <div id="mainmenu">
+      <a href="index.html">🏠 HOME</a>
+      <a href="about.html">⚡ About</a>
+      <a href="seller.html" class="active-page">👥 Sellers</a>
+      <a href="contact.html">📩 Contact</a>
+      <a href="#" onclick="openSubMenu()">Download Apks ➜</a>
+      <a href="https://play.buykey.today/public/login" class="side-cta" onclick="closeNav()">Login / Register</a>
+    </div>
+    <div id="submenu">
+      <a onclick="backMenu()">← Back</a>
+      <a href="/download/wake-download.html" onclick="closeNav()">WAKE MOD</a>
+      <a href="download/play-download.html" onclick="closeNav()">PLAY MOD</a>
+      <a href="#" onclick="closeNav()">MVP CEAT</a>
+      <a href="#" onclick="closeNav()">8 Ball Pool</a>
+    </div>
+  </div>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-badge">👥 Verified Sellers Network</div>
+      <h1>
+        <span class="line1">FIND YOUR</span>
+        <span class="line2">SELLER</span>
+      </h1>
+      <p>Browse verified sellers by game and country. Contact them instantly via Telegram, WhatsApp or Discord.</p>
+    </div>
+
+    <!-- SELLER SECTION -->
+    <section class="seller-section">
+      <div class="seller-wrap">
+
+        <!-- BREADCRUMB -->
+        <div class="step-trail">
+          <div class="step-crumb active" id="crumb1">① Game</div>
+          <div class="step-arrow">›</div>
+          <div class="step-crumb" id="crumb2">② Country</div>
+          <div class="step-arrow">›</div>
+          <div class="step-crumb" id="crumb3">③ Sellers</div>
+        </div>
+
+        <!-- STEP 1 — GAME -->
+        <div id="step1">
+          <div class="step-heading">Choose a Game</div>
+          <div class="game-grid">
+
+            <div class="game-card bgmi reveal" style="animation-delay:.05s">
+              <div class="game-art art-bgmi">
+                <div class="game-emoji">🪖</div>
+              </div>
+              <div class="game-body">
+                <div class="game-name o">BGMI</div>
+                <div class="game-sub">Battlegrounds Mobile India<br>UC Top-Up</div>
+                <button class="pick-btn btn-o" onclick="selectGame('bgmi','🪖 BGMI')">Select BGMI ›</button>
+              </div>
+            </div>
+
+            <div class="game-card pubg reveal" style="animation-delay:.12s">
+              <div class="game-art art-pubg">
+                <div class="game-emoji" style="animation-delay:.5s">🎖️</div>
+              </div>
+              <div class="game-body">
+                <div class="game-name b">PUBG Global</div>
+                <div class="game-sub">PUBG: Battlegrounds<br>UC Top-Up</div>
+                <button class="pick-btn btn-b" onclick="selectGame('pubg','🎖️ PUBG Global')">Select PUBG ›</button>
+              </div>
+            </div>
+
+            <div class="game-card pool reveal" style="animation-delay:.19s">
+              <div class="game-art art-pool">
+                <div class="game-emoji" style="animation-delay:1s">🎱</div>
+              </div>
+              <div class="game-body">
+                <div class="game-name g">8 Ball Pool</div>
+                <div class="game-sub">Miniclip 8 Ball Pool<br>Coins &amp; Pool Cash</div>
+                <button class="pick-btn btn-g" onclick="selectGame('pool','🎱 8 Ball Pool')">Select Pool ›</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- STEP 2 — COUNTRY -->
+        <div id="step2" class="hidden">
+          <div class="step-heading" id="step2Heading">Select Your Country</div>
+          <div class="country-grid">
+            <button class="country-card" onclick="selectCountry(this,'india')">
+              <span class="flag">🇮🇳</span><span class="cname">India</span>
+            </button>
+            <button class="country-card" onclick="selectCountry(this,'pakistan')">
+              <span class="flag">🇵🇰</span><span class="cname">Pakistan</span>
+            </button>
+            <button class="country-card" onclick="selectCountry(this,'bangladesh')">
+              <span class="flag">🇧🇩</span><span class="cname">Bangladesh</span>
+            </button>
+            <button class="country-card" onclick="selectCountry(this,'nepal')">
+              <span class="flag">🇳🇵</span><span class="cname">Nepal</span>
+            </button>
+            <button class="country-card" onclick="selectCountry(this,'srilanka')">
+              <span class="flag">🇱🇰</span><span class="cname">Sri Lanka</span>
+            </button>
+          </div>
+          <div class="back-row">
+            <button class="back-btn btn-b" onclick="goBack(1)">← Change Game</button>
+          </div>
+        </div>
+
+        <!-- STEP 3 — SELLERS -->
+        <div id="step3" class="hidden">
+          <div class="step-heading" id="step3Heading">Available Sellers</div>
+          <div id="sellerPanel"></div>
+          <div class="back-row">
+            <button class="back-btn btn-b" onclick="goBack(2)">← Change Country</button>
+            <button class="back-btn btn-o" onclick="goBack(1)">↩ Change Game</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-top">
+        <div>
+          <a class="footer-logo" href="index.html">M<span>V</span>P</a>
+          <p class="footer-desc">Premium game top-up store trusted by 500K+ gamers. Instant delivery, 24/7 support.</p>
+        </div>
+        <div class="fcol">
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="seller.html">Sellers</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="fcol">
+          <h4>Games</h4>
+          <ul>
+            <li><a href="#">BGMI UC</a></li>
+            <li><a href="#">PUBG Global</a></li>
+            <li><a href="#">8 Ball Pool</a></li>
+          </ul>
+        </div>
+        <div class="fcol">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="https://t.me/YOUR_USERNAME" target="_blank">Telegram</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="#">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-copy">© 2025 MVP. All rights reserved.</div>
+        <div class="footer-tags">
+          <span class="ftag">BGMI</span>
+          <span class="ftag">PUBG</span>
+          <span class="ftag">8 BALL POOL</span>
+          <span class="ftag">VERIFIED SELLERS</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ══════════════════════════════════════
+       BECOME A SELLER — FLOATING BUTTON
+       ══════════════════════════════════════ -->
+  <button class="float-seller-btn" onclick="openSellerModal(event)">🏪 BECOME A SELLER</button>
+
+  <!-- MODAL 1: GAME SELECTOR -->
+  <div class="bs-overlay" id="bsOverlay" onclick="bsCloseOutside(event)">
+    <div class="bs-modal" style="max-width:680px;">
+      <button class="bs-modal-close" onclick="closeSellerModal()">✕</button>
+      <div class="bs-title">🏪 Become a Seller</div>
+      <div class="bs-sub">Kaun sa game sell karna chahte ho? Game choose karo — uski price list dikhegi.</div>
+
+      <!-- Game Cards -->
+      <div class="bs-game-grid">
+
+        <!-- BGMI -->
+        <div class="bs-game-card bs-gc-bgmi" onclick="bsSelectGame('bgmi')">
+          <div class="bs-gc-art bs-gc-art-bgmi">
+            <div class="bs-gc-emoji">🪖</div>
+          </div>
+          <div class="bs-gc-body">
+            <div class="bs-gc-name" style="color:#ff6b00;">BGMI</div>
+            <div class="bs-gc-sub">Battlegrounds Mobile India<br>UC Seller — <span style="color:#00ff88;font-weight:700;">INR + UPI</span></div>
+            <div class="bs-gc-btn bs-gc-btn-o">Become BGMI Seller ›</div>
+          </div>
+        </div>
+
+        <!-- PUBG -->
+        <div class="bs-game-card bs-gc-pubg" onclick="bsSelectGame('pubg')">
+          <div class="bs-gc-art bs-gc-art-pubg">
+            <div class="bs-gc-emoji" style="animation-delay:.5s">🎖️</div>
+          </div>
+          <div class="bs-gc-body">
+            <div class="bs-gc-name" style="color:#00d4ff;">PUBG Global</div>
+            <div class="bs-gc-sub">PUBG: Battlegrounds Global<br>UC Seller — <span style="color:#ffd700;font-weight:700;">USD + Binance</span></div>
+            <div class="bs-gc-btn bs-gc-btn-b">Become PUBG Seller ›</div>
+          </div>
+        </div>
+
+        <!-- 8 Ball Pool -->
+        <div class="bs-game-card bs-gc-pool" onclick="bsSelectGame('pool')">
+          <div class="bs-gc-art bs-gc-art-pool">
+            <div class="bs-gc-emoji" style="animation-delay:1s">🎱</div>
+          </div>
+          <div class="bs-gc-body">
+            <div class="bs-gc-name" style="color:#00ff88;">8 Ball Pool</div>
+            <div class="bs-gc-sub">Miniclip 8 Ball Pool<br>Coins Seller — <span style="color:#ffd700;font-weight:700;">USD + Binance</span></div>
+            <div class="bs-gc-btn bs-gc-btn-g">Become Pool Seller ›</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="bs-info-bar" style="margin-top:1rem;">
+        🪖 BGMI → UPI Payment (INR) &nbsp;·&nbsp; 🎖️ PUBG &amp; 🎱 Pool → Binance TRC-20 USDT &nbsp;·&nbsp; 📋 Referral Code milega
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1B: PLAN SELECTOR (per game) -->
+  <div class="bs-plan-overlay" id="bsPlanOverlay">
+    <div class="bs-modal" style="max-width:660px;">
+      <button class="bs-modal-close" onclick="closePlanOverlay()">✕</button>
+      <button class="bs-modal-back" onclick="closePlanOverlay();openSellerModal(event);">←</button>
+      <div class="bs-title" id="bsPlanTitle">🪖 BGMI Seller Plans</div>
+      <div class="bs-sub" id="bsPlanSub">Balance package choose karo</div>
+      <div class="bs-rate-badge" id="bsPlanRateBadge">📊 Live Rate: 1 USDT ≈ ₹84 · Updated Today</div>
+      <div class="bs-plans-grid" id="bsPlansGrid">
+        <!-- filled by JS -->
+      </div>
+      <div class="bs-info-bar" id="bsPlanInfoBar">
+        🏪 Payment ke baad Referral Code milega · 📋 Code copy karke activate karo
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PAYMENT (UPI for BGMI / Binance TRC-20 for PUBG & Pool) -->
+  <div class="bs-qr-overlay" id="bsQrOverlay">
+    <div class="bs-qr-modal">
+      <button class="bs-modal-close" onclick="closeBsPayQr()" style="position:absolute;top:0.75rem;right:0.75rem;">✕</button>
+      <button class="bs-modal-back" onclick="closeBsPayQr();openPlanOverlay();" style="position:absolute;top:0.75rem;left:0.75rem;">←</button>
+
+      <!-- ═══ UPI SECTION (BGMI) ═══ -->
+      <div id="bsUpiSection">
+        <div class="bs-qr-title">⚡ Secure UPI Payment</div>
+        <div class="bs-qr-sub" id="bsQrSub">Scan QR or choose your UPI app to pay</div>
+        <div id="bsPayContent">
+          <div style="display:flex;align-items:stretch;gap:14px;margin-bottom:1rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:0;flex-shrink:0;">
+              <div class="bs-amount-tag" id="bsAmountTag">₹3000</div>
+              <svg width="110" height="115" viewBox="0 0 110 115" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.55;flex-shrink:0;">
+                <g style="animation:psTilt 3s ease-in-out infinite;">
+                  <rect x="12" y="6" width="42" height="74" rx="7" fill="none" stroke="#00ff88" stroke-width="2"/>
+                  <rect x="16" y="13" width="34" height="50" rx="3" fill="rgba(0,255,136,0.07)" stroke="#00ff88" stroke-width="0.8"/>
+                  <circle cx="33" cy="87" r="3.5" fill="none" stroke="#00ff88" stroke-width="1.3"/>
+                  <circle cx="33" cy="9" r="1.5" fill="#00ff88" opacity="0.5"/>
+                  <rect x="20" y="19" width="6" height="6" rx="1" fill="rgba(0,255,136,0.35)"/><rect x="29" y="19" width="6" height="6" rx="1" fill="rgba(0,255,136,0.35)"/><rect x="38" y="19" width="6" height="6" rx="1" fill="rgba(0,255,136,0.35)"/>
+                  <rect x="20" y="28" width="6" height="6" rx="1" fill="rgba(0,255,136,0.35)"/><rect x="38" y="28" width="6" height="6" rx="1" fill="rgba(0,255,136,0.35)"/>
+                  <rect x="20" y="37" width="6" height="6" rx="1" fill="rgba(0,255,136,0.35)"/><rect x="29" y="28" width="6" height="6" rx="1" fill="rgba(0,255,136,0.2)"/><rect x="29" y="37" width="6" height="6" rx="1" fill="rgba(0,255,136,0.2)"/><rect x="38" y="37" width="6" height="6" rx="1" fill="rgba(0,255,136,0.35)"/>
+                  <path d="M16 19 L16 23 M16 19 L20 19" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round"/><path d="M50 19 L50 23 M50 19 L46 19" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M16 57 L16 53 M16 57 L20 57" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round"/><path d="M50 57 L50 53 M50 57 L46 57" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round"/>
+                  <line style="animation:psScan 1.8s ease-in-out infinite;" x1="17" y1="38" x2="49" y2="38" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round"/>
+                </g>
+                <line x1="58" y1="38" x2="88" y2="38" stroke="#00ff88" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+                <circle cx="98" cy="38" r="12" fill="rgba(0,255,136,0.09)" stroke="#00ff88" stroke-width="1.3"/>
+                <path d="M92 38 L96 43 L104 33" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-dasharray="30"><animate attributeName="stroke-dashoffset" from="30" to="0" dur="0.9s" repeatCount="indefinite"/></path>
+                <circle r="2.5" fill="#00ff88"><animate attributeName="cx" values="58;73;98" dur="1.4s" repeatCount="indefinite"/><animate attributeName="cy" values="38;38;38" dur="1.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0.7;0" dur="1.4s" repeatCount="indefinite"/></circle>
+                <circle r="2.5" fill="#ffd700"><animate attributeName="cx" values="58;73;98" dur="1.4s" begin="0.47s" repeatCount="indefinite"/><animate attributeName="cy" values="38;38;38" dur="1.4s" begin="0.47s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0.7;0" dur="1.4s" begin="0.47s" repeatCount="indefinite"/></circle>
+                <circle r="2.5" fill="#00d4ff"><animate attributeName="cx" values="58;73;98" dur="1.4s" begin="0.94s" repeatCount="indefinite"/><animate attributeName="cy" values="38;38;38" dur="1.4s" begin="0.94s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0.7;0" dur="1.4s" begin="0.94s" repeatCount="indefinite"/></circle>
+              </svg>
+            </div>
+            <div class="bs-qr-wrap" style="margin:0;flex-shrink:0;">
+              <img id="bsQrcode" src="" alt="UPI QR" style="width:175px;height:175px;display:block;border-radius:6px;">
+            </div>
+          </div>
+          <div class="bs-upi-row">
+            <span style="font-size:0.8rem;color:#6b8aad;">UPI ID:</span>
+            <span class="bs-upi-tag">paytm.slonc0m@pty</span>
+          </div>
+          <div style="font-size:0.78rem;color:#6b8aad;margin-bottom:0.7rem;">👇 Ya apna UPI app directly open karo:</div>
+          <div class="bs-pay-methods">
+            <button class="bs-pay-app-btn" onclick="bsOpenUpiApp(this,'com.phonepe.app')" title="PhonePe"><span class="app-logo logo-phonepe"></span></button>
+            <button class="bs-pay-app-btn" onclick="bsOpenUpiApp(this,'com.google.android.apps.nbu.paisa.user')" title="Google Pay"><span class="app-logo logo-gpay"></span></button>
+            <button class="bs-pay-app-btn" onclick="bsOpenUpiApp(this,'in.org.npci.upiapp')" title="BHIM"><span class="app-logo logo-bhim"></span></button>
+            <button class="bs-pay-app-btn" onclick="bsOpenUpiApp(this,'net.one97.paytm')" title="Paytm"><span class="app-logo logo-paytm"></span></button>
+            <button class="bs-pay-app-btn" onclick="bsOpenUpiApp(this,'com.niyo.goniyo')" title="Navi"><span class="app-logo logo-navi"></span></button>
+            <button class="bs-pay-app-btn" onclick="bsOpenUpiOther(this)" title="Other Apps"><span class="app-logo logo-other"></span></button>
+          </div>
+          <div style="margin:0.8rem 0 0.3rem;font-size:0.78rem;color:#aac;">📝 Payment ke baad UTR / Transaction ID daalo:</div>
+          <!-- UTR + Photo attach row -->
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="bsUtrInput" placeholder="12-digit UTR ya Transaction ID..." maxlength="20" inputmode="numeric"
+              style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(0,255,136,0.25);color:#e8f4ff;border-radius:10px;padding:10px 14px;font-size:0.85rem;outline:none;transition:border-color 0.2s;box-sizing:border-box;"
+              oninput="bsClearUtrError(this)" />
+            <!-- Chota photo attach button -->
+            <label for="bsQrPhotoInput" id="bsQrPhotoBtn"
+              style="flex-shrink:0;width:44px;height:44px;border-radius:10px;border:1.5px solid rgba(0,212,255,0.35);background:rgba(0,212,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer !important;transition:all 0.2s;position:relative;" title="Screenshot attach karo">
+              <span style="font-size:1.2rem;">📸</span>
+              <span id="bsQrPhotoDot" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;background:#00ff88;border-radius:50%;border:1.5px solid #0a0f1e;box-shadow:0 0 6px #00ff88;"></span>
+            </label>
+            <input type="file" id="bsQrPhotoInput" accept="image/*" style="display:none;" onchange="bsQrPhotoSelected(this)">
+          </div>
+          <!-- QR photo mini preview -->
+          <div id="bsQrPhotoPreview" style="display:none;margin-top:0.5rem;border-radius:8px;overflow:hidden;border:1px solid rgba(0,255,136,0.25);position:relative;max-height:80px;">
+            <img id="bsQrPreviewImg" src="" alt="Screenshot" style="width:100%;max-height:80px;object-fit:cover;display:block;">
+            <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 60%,rgba(0,0,0,0.6));display:flex;align-items:center;justify-content:flex-end;padding-right:8px;">
+              <button onclick="bsClearQrPhoto()" style="background:rgba(255,40,40,0.85);border:none;color:#fff;width:22px;height:22px;border-radius:50%;font-size:0.7rem;cursor:pointer !important;display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>
+          </div>
+          <div id="bsUtrError" style="color:#ff4444;font-size:0.75rem;margin-top:5px;margin-bottom:8px;padding-left:4px;display:none;"></div>
+
+          <!-- ✅ EXACT AMOUNT WARNING -->
+          <div id="bsExactAmountWarn" style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.3);border-radius:10px;padding:9px 13px;margin-bottom:0.7rem;font-size:0.77rem;color:#ff9955;line-height:1.6;"></div>
+
+          <!-- ✅ AMOUNT CONFIRM INPUT -->
+          <div style="margin-bottom:0.35rem;font-size:0.78rem;color:#aac;">💰 Aapne kitne rupaye pay kiye? (exact likho):</div>
+          <input type="number" id="bsAmountConfirmInput" placeholder="e.g. 3000.47 — exact amount" step="0.01" inputmode="decimal"
+            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(0,212,255,0.3);color:#e8f4ff;border-radius:10px;padding:10px 14px;font-size:0.9rem;font-weight:700;font-family:'Orbitron',monospace;letter-spacing:1px;outline:none;transition:border-color 0.2s;box-sizing:border-box;margin-bottom:0.6rem;"
+            oninput="this.style.borderColor='rgba(0,212,255,0.3)'" />
+
+          <!-- ✅ TIMER -->
+          <div id="bsPayTimer" style="display:none;align-items:center;gap:6px;justify-content:center;font-size:0.82rem;margin-bottom:0.7rem;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:7px 12px;"></div>
+
+          <button class="bs-verify-btn" id="bsVerifyBtn" onclick="bsVerifyPayment()">✅ PAYMENT VERIFY KARO</button>
+          <div class="bs-pay-note">📸 Screenshot + UTR + Exact amount — teeno zaroori hain verify ke liye.</div>
+        </div>
+        <div class="bs-loader" id="bsPayLoader">
+          <div class="bs-spin-ring"></div>
+          <div class="bs-loader-txt">Verifying Payment...</div>
+        </div>
+      </div>
+
+      <!-- ═══ BINANCE TRC-20 SECTION (PUBG & Pool) ═══ -->
+      <div id="bsBinanceSection" style="display:none;">
+        <div class="bs-qr-title" style="color:#ffd700;">₮ Binance TRC-20 Payment</div>
+        <div class="bs-qr-sub" id="bsBinSub">USDT (TRC-20) send karo niche diye wallet pe</div>
+
+        <!-- Amount badge -->
+        <div class="bs-amount-tag" id="bsBinAmountTag" style="background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3);color:#ffd700;margin-bottom:1rem;">$36 ~ $60</div>
+
+        <!-- Binance logo + network badge -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:1rem;">
+          <div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:10px;padding:6px 14px;display:flex;align-items:center;gap:7px;">
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><path d="M16 0L19.8 3.8L8.4 15.2L4.6 11.4L16 0Z" fill="#F0B90B"/><path d="M22.8 6.8L26.6 10.6L8.4 28.8L4.6 25L22.8 6.8Z" fill="#F0B90B"/><path d="M2 13.2L5.8 17L2 20.8L-1.8 17L2 13.2Z" fill="#F0B90B" transform="translate(14 -1)"/><path d="M29.4 13L32 15.6V17.6L29.4 20.2L25.6 16.4L29.4 13Z" fill="#F0B90B" transform="translate(-13 0)"/><path d="M16 19L19.8 22.8L16 26.6L12.2 22.8L16 19Z" fill="#F0B90B" transform="translate(0 6)"/></svg>
+            <span style="font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:800;color:#ffd700;">BINANCE</span>
+          </div>
+          <div style="background:rgba(255,107,0,0.1);border:1px solid rgba(255,107,0,0.3);border-radius:8px;padding:5px 12px;">
+            <span style="font-family:'Orbitron',monospace;font-size:0.7rem;font-weight:800;color:#ff6b00;">TRC-20 · USDT</span>
+          </div>
+        </div>
+
+        <!-- QR Code -->
+        <div style="display:flex;justify-content:center;margin-bottom:1rem;">
+          <div style="background:#fff;padding:10px;border-radius:14px;box-shadow:0 0 30px rgba(255,215,0,0.2);">
+            <img id="bsBinQr" src="" alt="TRC20 QR" style="width:170px;height:170px;display:block;border-radius:6px;">
+          </div>
+        </div>
+
+        <!-- Wallet Address -->
+        <div style="margin-bottom:0.5rem;font-size:0.75rem;color:#6b8aad;text-align:center;">📋 TRC-20 Wallet Address:</div>
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:10px 14px;margin-bottom:1.2rem;">
+          <span id="bsTrcAddress" style="font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:700;color:#ffd700;flex:1;word-break:break-all;letter-spacing:1px;">TYourTRC20WalletAddressHere</span>
+          <button onclick="bsCopyTrcAddress()" style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:7px;padding:5px 10px;font-size:0.72rem;font-weight:700;cursor:pointer !important;white-space:nowrap;flex-shrink:0;" id="bsCopyAddrBtn">📋 Copy</button>
+        </div>
+
+        <!-- Warning -->
+        <div style="background:rgba(255,107,0,0.07);border:1px solid rgba(255,107,0,0.2);border-radius:10px;padding:10px 14px;margin-bottom:1.2rem;font-size:0.77rem;color:#ff9955;line-height:1.6;">
+          ⚠️ <strong>Sirf TRC-20 network pe USDT bhejo</strong> — koi aur network use karne pe amount LOST ho sakta hai. Exact amount bhejo.
+        </div>
+
+        <!-- TxID input -->
+        <div style="margin-bottom:0.35rem;font-size:0.78rem;color:#aac;">📝 Payment ke baad Binance TxID / Hash daalo:</div>
+        <!-- TxID + Photo attach row -->
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="bsBinTxInput" placeholder="TxID ya Transaction Hash daalo..."
+            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,215,0,0.25);color:#e8f4ff;border-radius:10px;padding:10px 14px;font-size:0.82rem;outline:none;transition:border-color 0.2s;box-sizing:border-box;"
+            oninput="bsClearBinError(this)" />
+          <!-- Chota photo attach button -->
+          <label for="bsBinPhotoInput" id="bsBinPhotoBtn"
+            style="flex-shrink:0;width:44px;height:44px;border-radius:10px;border:1.5px solid rgba(255,215,0,0.35);background:rgba(255,215,0,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer !important;transition:all 0.2s;position:relative;" title="Screenshot attach karo">
+            <span style="font-size:1.2rem;">📸</span>
+            <span id="bsBinPhotoDot" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;background:#00ff88;border-radius:50%;border:1.5px solid #0a0f1e;box-shadow:0 0 6px #00ff88;"></span>
+          </label>
+          <input type="file" id="bsBinPhotoInput" accept="image/*" style="display:none;" onchange="bsBinPhotoSelected(this)">
+        </div>
+        <!-- Binance photo mini preview -->
+        <div id="bsBinPhotoPreview" style="display:none;margin-top:0.5rem;border-radius:8px;overflow:hidden;border:1px solid rgba(255,215,0,0.25);position:relative;max-height:80px;">
+          <img id="bsBinPreviewImg" src="" alt="Screenshot" style="width:100%;max-height:80px;object-fit:cover;display:block;">
+          <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 60%,rgba(0,0,0,0.6));display:flex;align-items:center;justify-content:flex-end;padding-right:8px;">
+            <button onclick="bsClearBinPhoto()" style="background:rgba(255,40,40,0.85);border:none;color:#fff;width:22px;height:22px;border-radius:50%;font-size:0.7rem;cursor:pointer !important;display:flex;align-items:center;justify-content:center;">✕</button>
+          </div>
+        </div>
+        <div id="bsBinTxError" style="color:#ff4444;font-size:0.75rem;margin-top:5px;margin-bottom:8px;padding-left:4px;display:none;"></div>
+        <div style="height:0.6rem;"></div>
+        <button class="bs-verify-btn" style="background:linear-gradient(135deg,#ffd700,#ff8c00);" onclick="bsVerifyBinance()">✅ PAYMENT VERIFY KARO</button>
+        <div class="bs-pay-note">📸 Screenshot attach karo + TxID daalo — tabhi verify hoga.</div>
+
+        <div class="bs-loader" id="bsBinLoader" style="display:none;flex-direction:column;align-items:center;gap:1rem;padding:2rem 0;">
+          <div style="width:60px;height:60px;border-radius:50%;border:3px solid rgba(255,215,0,0.1);border-top-color:#ffd700;animation:bsSpin 0.8s linear infinite;"></div>
+          <div class="bs-loader-txt" style="color:#ffd700;">Verifying Payment...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL 3: SUCCESS TRANSITION -->
+  <div class="bs-success-overlay" id="bsSuccessOverlay">
+    <div class="bs-success-box">
+      <div class="bs-success-ring">✅</div>
+      <div class="bs-success-title">Payment Successful!</div>
+      <div class="bs-success-sub" id="bsSuccessSub">Generating your Referral Code...</div>
+      <div style="margin-top:1.5rem;">
+        <div class="bs-spin-ring" style="margin:0 auto;width:40px;height:40px;border-width:2px;border-top-color:#00ff88;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: REFERRAL CODE DISPLAY -->
+  <div class="bs-ref-overlay" id="bsRefOverlay">
+    <div class="bs-ref-box">
+      <div class="bs-ref-icon">🏪</div>
+      <div class="bs-ref-title">Seller Referral Code!</div>
+      <div class="bs-ref-sub" id="bsRefSub">Ye code copy karo aur seller panel mein activate karo. Dobara nahi dikhega!</div>
+      <div class="bs-ref-display" id="bsRefDisplay">MVP8BP-REFRAL</div>
+      <button class="bs-copy-btn" id="bsCopyBtn" onclick="bsCopyRef()">
+        <span>📋</span> <span id="bsCopyBtnTxt">CLICK — COPY CODE</span>
+      </button>
+      <button class="bs-close-btn" onclick="bsOpenRegister()">📝 REGISTER AS SELLER</button>
+    </div>
+  </div>
+
+  <!-- MODAL 5: REGISTER AS SELLER FORM -->
+  <div class="bs-reg-overlay" id="bsRegOverlay">
+    <div class="bs-reg-modal">
+      <button class="bs-modal-close" onclick="bsCloseRegister()" style="position:absolute;top:0.75rem;right:0.75rem;">✕</button>
+      <button class="bs-modal-back" onclick="bsCloseRegister();bsReopenPayQr();" style="position:absolute;top:0.75rem;left:0.75rem;">←</button>
+
+      <!-- FORM STATE -->
+      <div id="bsRegFormState">
+        <div class="bs-reg-title">📝 Seller Registration</div>
+        <div class="bs-reg-sub">Apni details bharo — team tumhe verify karke seller access degi.</div>
+
+        <!-- Name / Panel Username + Password -->
+        <div class="rfield-row">
+          <div class="rfield-group">
+            <label class="rfield-label">Name / Panel Username</label>
+            <input type="text" class="rfield-input" id="br_name" placeholder="Ravi / ravi123">
+          </div>
+          <div class="rfield-group">
+            <label class="rfield-label">Password</label>
+            <div style="position:relative;">
+              <input type="password" class="rfield-input" id="br_pass" placeholder="••••••••" style="padding-right:42px;">
+              <button type="button" onclick="bsTogglePass()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#6b8aad;font-size:1rem;cursor:pointer !important;padding:0;line-height:1;" id="bsPassEye">👁</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UTR / TxID auto-filled + Amount readonly -->
+        <div class="rfield-row">
+          <div class="rfield-group">
+            <label class="rfield-label">UTR / Transaction ID</label>
+            <div style="position:relative;">
+              <input type="text" class="rfield-input" id="br_utr" placeholder="Auto-fill hoga..." readonly
+                style="background:rgba(0,212,255,0.05);border-color:rgba(0,212,255,0.3);color:#00d4ff;font-family:'Orbitron',monospace;font-size:0.8rem;letter-spacing:1px;cursor:default;">
+              <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:0.65rem;background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:1px;">AUTO</span>
+            </div>
+          </div>
+          <div class="rfield-group">
+            <label class="rfield-label">Payment Amount</label>
+            <div style="position:relative;">
+              <input type="text" class="rfield-input" id="br_amount" placeholder="Auto-fill hoga..." readonly
+                style="background:rgba(0,255,136,0.05);border-color:rgba(0,255,136,0.3);color:#00ff88;font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:800;letter-spacing:1px;cursor:default;">
+              <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:0.65rem;background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.3);color:#00ff88;padding:2px 6px;border-radius:4px;font-weight:700;letter-spacing:1px;">🔒</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telegram + Email -->
+        <div class="rfield-row">
+          <div class="rfield-group">
+            <label class="rfield-label">Telegram / Username</label>
+            <input type="text" class="rfield-input" id="br_tg" placeholder="@yourtg or N/A">
+          </div>
+          <div class="rfield-group">
+            <label class="rfield-label">Email (optional)</label>
+            <input type="email" class="rfield-input" id="br_email" placeholder="your@email.com">
+          </div>
+        </div>
+
+        <div id="bsRegError" style="color:#ff4444;font-size:0.78rem;margin-bottom:0.6rem;display:none;padding-left:2px;"></div>
+
+        <button class="bs-reg-submit" id="bsRegSubmitBtn" onclick="bsSubmitRegister()">
+          ✈️ &nbsp;SEND REGISTRATION
+        </button>
+      </div>
+
+      <!-- SENT STATE -->
+      <div class="bs-reg-sent" id="bsRegSentState">
+        <div class="bs-reg-sent-ring">✅</div>
+        <div class="bs-reg-sent-title">Registration Sent!</div>
+        <div class="bs-reg-sent-sub">
+          Tumhari details aur screenshot Telegram pe bhej di gayi hai.<br>
+          Team jald hi tumse contact karegi. 🚀
+        </div>
+        <button class="bs-reg-done-btn" onclick="bsCloseAll()">✓ DONE — CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════
+    //  SELLER DATA  — replace with real info
+    //  tg  = Telegram username (without @)
+    //  wa  = WhatsApp number with country code
+    //  dc  = Discord user ID or username#tag
+    // ══════════════════════════════════════════════
+    const sellers = {
+      bgmi: {
+        india: [{ name: 'RaviTopUp', sub: 'BGMI Specialist', verified: true, top: true, color: '#ff6b00,#ff9500', tg: 'seller_ravi', wa: '919876543210', dc: 'ravitopup' },
+        { name: 'PriyaGames', sub: 'BGMI UC Fast Delivery', verified: true, top: false, color: '#00d4ff,#0055aa', tg: 'priya_games', wa: '919812345678', dc: 'priyagames' },
+        { name: 'SnehaStore', sub: 'BGMI & PUBG', verified: false, top: false, color: '#00ff88,#00aa55', tg: 'sneha_store', wa: '919898765432', dc: 'snehastore' }],
+        pakistan: [{ name: 'AhmedBGMI', sub: 'BGMI UC', verified: true, top: false, color: '#ffd700,#ff8c00', tg: 'ahmed_bgmi', wa: '923001234567', dc: 'ahmedbgmi' },
+        { name: 'KarachiGG', sub: 'All Currencies', verified: false, top: false, color: '#00d4ff,#0055aa', tg: 'karachi_gg', wa: '923121234567', dc: 'karachgg' }],
+        bangladesh: [{ name: 'DhakaUC', sub: 'BGMI Top-Up', verified: true, top: false, color: '#ff6b00,#ff9500', tg: 'dhaka_uc', wa: '8801712345678', dc: 'dhakauc' }],
+        nepal: [{ name: 'KTMGames', sub: 'BGMI & Delta Force', verified: true, top: false, color: '#00ff88,#00aa55', tg: 'ktm_games', wa: '9779801234567', dc: 'ktmgames' }],
+        srilanka: [{ name: 'ColomboGG', sub: 'BGMI UC', verified: true, top: false, color: '#ffd700,#ff8c00', tg: 'colombo_gg', wa: '94771234567', dc: 'colombogg' }],
+      },
+      pubg: {
+        india: [{ name: 'KiranGlobal', sub: 'PUBG Global UC', verified: true, top: true, color: '#00d4ff,#0055aa', tg: 'kiran_global', wa: '919765432109', dc: 'kiranglobal' },
+        { name: 'ZayanMods', sub: 'PUBG Global Reseller', verified: false, top: false, color: '#ff00aa,#9900ff', tg: 'zayan_mods', wa: '919654321098', dc: 'zayanmods' }],
+        pakistan: [{ name: 'LahoreGamer', sub: 'PUBG UC Specialist', verified: true, top: true, color: '#ff6b00,#ff9500', tg: 'lahore_gamer', wa: '923311234567', dc: 'lahoregamer' },
+        { name: 'IslamabadPUBG', sub: 'PUBG Global', verified: true, top: false, color: '#00ff88,#00aa55', tg: 'islamabad_pubg', wa: '923211234567', dc: 'islmbd_pubg' }],
+        bangladesh: [{ name: 'BDGamerPro', sub: 'PUBG Global UC', verified: true, top: false, color: '#00d4ff,#0055aa', tg: 'bd_gamer_pro', wa: '8801812345678', dc: 'bdgamerpro' }],
+        nepal: [{ name: 'NepalUCShop', sub: 'PUBG Global', verified: false, top: false, color: '#ff00aa,#9900ff', tg: 'nepal_uc_shop', wa: '9779851234567', dc: 'nepaluc' }],
+        srilanka: [{ name: 'SLTopUpPro', sub: 'PUBG & BGMI', verified: true, top: true, color: '#00ff88,#00aa55', tg: 'sl_topup_pro', wa: '94781234567', dc: 'sltopup' }],
+      },
+      pool: {
+        india: [{ name: 'CoinKing', sub: '8Ball Pool Coins', verified: true, top: true, color: '#00ff88,#00aa55', tg: 'coin_king', wa: '919700000001', dc: 'coinking' },
+        { name: 'PoolMaster', sub: 'Coins & Pool Cash', verified: true, top: false, color: '#ffd700,#ff8c00', tg: 'pool_master', wa: '919700000002', dc: 'poolmaster' },
+        { name: 'EightBallPro', sub: 'Fast Delivery', verified: false, top: false, color: '#ff00aa,#9900ff', tg: 'eight_ball_pro', wa: '919700000003', dc: 'eightballpro' }],
+        pakistan: [{ name: 'PKPoolShop', sub: '8Ball Coins Dealer', verified: true, top: false, color: '#00d4ff,#0055aa', tg: 'pk_pool_shop', wa: '923500000001', dc: 'pkpool' }],
+        bangladesh: [{ name: 'CtgSeller', sub: '8Ball Pool Coins', verified: false, top: false, color: '#ff6b00,#ff9500', tg: 'ctg_seller', wa: '8801912345678', dc: 'ctgseller' }],
+        nepal: [{ name: 'NepalCoins', sub: 'Pool Coins', verified: true, top: false, color: '#00ff88,#00aa55', tg: 'nepal_coins', wa: '9779861234567', dc: 'nepalcoins' }],
+        srilanka: [{ name: 'GamingIsland', sub: '8Ball Pool', verified: false, top: false, color: '#ffd700,#ff8c00', tg: 'gaming_island', wa: '94761234567', dc: 'gisland' }],
+      }
+    };
+
+    const gameLabels = { bgmi: '🪖 BGMI', pubg: '🎖️ PUBG Global', pool: '🎱 8 Ball Pool' };
+    const gameColorCls = { bgmi: 'o', pubg: 'b', pool: 'g' };
+    const countryNames = { india: '🇮🇳 India', pakistan: '🇵🇰 Pakistan', bangladesh: '🇧🇩 Bangladesh', nepal: '🇳🇵 Nepal', srilanka: '🇱🇰 Sri Lanka' };
+
+    let curGame = null;
+
+    function selectGame(game, label) {
+      curGame = game;
+      show('step2'); hide('step1'); hide('step3');
+      document.getElementById('step2Heading').textContent = 'Select Your Country — ' + label;
+      document.querySelectorAll('.country-card').forEach(c => c.classList.remove('active'));
+      setCrumb(1, 'done'); setCrumb(2, 'active'); setCrumb(3, '');
+      scrollToSection('step2');
+    }
+
+    function selectCountry(el, country) {
+      document.querySelectorAll('.country-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      setTimeout(() => {
+        hide('step2'); show('step3'); hide('step1');
+        document.getElementById('step3Heading').textContent = 'Sellers — ' + gameLabels[curGame] + ' · ' + countryNames[country];
+        renderSellers(curGame, country);
+        setCrumb(1, 'done'); setCrumb(2, 'done'); setCrumb(3, 'active');
+        scrollToSection('step3');
+      }, 160);
+    }
+
+    function goBack(toStep) {
+      if (toStep === 1) { show('step1'); hide('step2'); hide('step3'); setCrumb(1, 'active'); setCrumb(2, ''); setCrumb(3, ''); scrollToSection('step1'); }
+      if (toStep === 2) { show('step2'); hide('step1'); hide('step3'); setCrumb(1, 'done'); setCrumb(2, 'active'); setCrumb(3, ''); scrollToSection('step2'); }
+    }
+
+    function show(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hide(id) { document.getElementById(id).classList.add('hidden'); }
+    function setCrumb(n, s) { document.getElementById('crumb' + n).className = 'step-crumb' + (s ? ' ' + s : ''); }
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' }), 50);
+    }
+
+    function renderSellers(game, country) {
+      const panel = document.getElementById('sellerPanel');
+      const list = (sellers[game] && sellers[game][country]) || [];
+      const gc = gameColorCls[game];
+
+      if (!list.length) {
+        panel.innerHTML = `<div class="seller-panel"><div class="seller-empty"><div class="seller-empty-icon">🔍</div><p>No sellers listed for this game &amp; region yet.<br>Check back soon or contact us directly.</p></div></div>`;
+        return;
+      }
+
+      const tgSVG = `<svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.19 13.67l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.958.889z"/></svg>`;
+      const waSVG = `<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>`;
+      const dcSVG = `<svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.079.11 18.1.12 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>`;
+
+      const rows = list.map((s, i) => `
+    <div class="seller-row" style="animation-delay:${i * .07}s">
+      <div class="sleft">
+        <div class="sav" style="background:linear-gradient(135deg,${s.color})">${s.name.slice(0, 2).toUpperCase()}</div>
+        <div class="sinfo">
+          <div class="sname">${s.name}</div>
+          <div class="smeta">${s.sub}${s.verified ? ' <span class="bv">✓ Verified</span>' : ''}${s.top ? ' <span class="bt">⭐ Top Seller</span>' : ''}</div>
+        </div>
+      </div>
+      <div class="sbtns">
+        <a href="https://t.me/${s.tg}" target="_blank" class="sbtn tg" title="DM on Telegram">${tgSVG}</a>
+        <a href="https://wa.me/${s.wa}" target="_blank" class="sbtn wa" title="DM on WhatsApp">${waSVG}</a>
+        <a href="https://discordapp.com/users/${s.dc}" target="_blank" class="sbtn dc" title="DM on Discord">${dcSVG}</a>
+      </div>
+    </div>`).join('');
+
+      panel.innerHTML = `
+    <div class="seller-panel">
+      <div class="panel-header">
+        <div class="panel-title">${countryNames[country]} · ${gameLabels[game]}</div>
+        <div class="panel-meta">
+          <span class="ptag ${gc}">${list.length} Sellers</span>
+          <span class="ptag g">${list.filter(s => s.verified).length} Verified</span>
+        </div>
+      </div>
+      ${rows}
+    </div>`;
+    }
+
+    /* NAV */
+    function openNav() { document.getElementById('myMenu').style.width = '280px'; document.getElementById('navOverlay').classList.add('active'); }
+    function closeNav() { document.getElementById('myMenu').style.width = '0'; document.getElementById('navOverlay').classList.remove('active'); document.getElementById('mainmenu').style.display = 'block'; document.getElementById('submenu').style.display = 'none'; }
+    function openSubMenu() { document.getElementById('mainmenu').style.display = 'none'; document.getElementById('submenu').style.display = 'block'; }
+    function backMenu() { document.getElementById('mainmenu').style.display = 'block'; document.getElementById('submenu').style.display = 'none'; }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+
+    /* CURSOR */
+    const cursor = document.getElementById('cursor'), ring = document.getElementById('cursorRing');
+    let mx = -100, my = -100, rx = -100, ry = -100;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function ac() { cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; rx += (mx - rx) * .12; ry += (my - ry) * .12; ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; requestAnimationFrame(ac); })();
+    document.addEventListener('mousedown', () => { cursor.style.transform = 'translate(-50%,-50%) scale(2)'; ring.style.transform = 'translate(-50%,-50%) scale(.6)'; });
+    document.addEventListener('mouseup', () => { cursor.style.transform = 'translate(-50%,-50%) scale(1)'; ring.style.transform = 'translate(-50%,-50%) scale(1)'; });
+
+    /* PARTICLES */
+    const cv = document.getElementById('particles'), cx = cv.getContext('2d');
+    let W = cv.width = innerWidth, H = cv.height = innerHeight;
+    window.addEventListener('resize', () => { W = cv.width = innerWidth; H = cv.height = innerHeight; });
+    const pts = Array.from({ length: 65 }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4, r: Math.random() * 1.5 + .3, a: Math.random() * .5 + .1, c: Math.random() > .6 ? '#00d4ff' : Math.random() > .5 ? '#ff6b00' : '#00ff88' }));
+    (function dp() { cx.clearRect(0, 0, W, H); pts.forEach((p, i) => { p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; if (p.y < 0) p.y = H; if (p.y > H) p.y = 0; pts.slice(i + 1).forEach(q => { const dx = p.x - q.x, dy = p.y - q.y, d = Math.sqrt(dx * dx + dy * dy); if (d < 130) { cx.beginPath(); cx.moveTo(p.x, p.y); cx.lineTo(q.x, q.y); cx.strokeStyle = `rgba(0,212,255,${.06 * (1 - d / 130)})`; cx.lineWidth = .5; cx.stroke(); } }); cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, Math.PI * 2); cx.fillStyle = p.c + Math.round(p.a * 255).toString(16).padStart(2, '0'); cx.fill(); }); requestAnimationFrame(dp); })();
+
+    /* REVEAL */
+    const ro = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach(r => ro.observe(r));
+
+    /* ══════════════════════════════════════
+       BECOME A SELLER — JS v3 (per-game)
+       ══════════════════════════════════════ */
+    // ══════════════════════════════════════
+    //  ⚙️  CONFIG — Sirf yahan change karo
+    // ══════════════════════════════════════
+    // 🔗 Apna Railway/Render URL yahan daalo (deploy ke baad)
+    const BACKEND_URL = ''; // e.g. 'https://mvp-server.railway.app' — khali chhodo = local/manual mode
+    const TG_BOT_TOKEN = '8667488276:AAG5KYsDeAV0Pa1JC6plsFXhZU-O1O_ylvg'; // BotFather se milega
+    const TG_CHAT_ID   = '6512758782';                                        // @userinfobot se milega
+    const IMGUR_CLIENT_ID = '546c25a59c58ad7'; // purana — ab use nahi hota
+    const IMGBB_API_KEY   = '7da8e1b0d688498b9bc078d3a6556072';
+    const TRC20_WALLET = 'TYourTRC20WalletAddressHerePlaceholder';            // Apna Binance TRC-20 address
+    // ══════════════════════════════════════
+    let bsSelectedAmount = 0, bsSelectedLabel = '', bsSelectedGame = '';
+    let bsPaymentUtr = '', bsPaymentAmount = '';  // auto-fill for registration form
+
+    const bsPlans = {
+      bgmi: {
+        currency:'INR', payMode:'upi',
+        title:'🪖 BGMI Seller Plans',
+        sub:'BGMI UC seller package choose karo — INR (UPI) se payment',
+        rateBadge:'🔒 Secure UPI · INR Payment',
+        infoBadge:'🪖 BGMI → UPI se pay karo · Referral Code milega · 📋 Copy & activate karo',
+        plans:[
+          {label:'₹3K ~ ₹5K',   amount:3000,  sub2:'~$36 ~ $60',    badge:''},
+          {label:'₹5K ~ ₹8K',   amount:5000,  sub2:'~$60 ~ $95',    badge:''},
+          {label:'₹10K ~ ₹18K', amount:10000, sub2:'~$120 ~ $215',  badge:'popular'},
+          {label:'₹20K ~ ₹42K', amount:20000, sub2:'~$240 ~ $500',  badge:''},
+          {label:'₹50K ~ ₹120K',amount:50000, sub2:'~$595 ~ $1,430',badge:''},
+          {label:'₹100K ~ ₹250K',amount:100000,sub2:'~$1,190 ~ $2,975',badge:'best'},
+        ]
+      },
+      pubg: {
+        currency:'USD', payMode:'binance',
+        title:'🎖️ PUBG Global Seller Plans',
+        sub:'PUBG UC seller package choose karo — USD (Binance TRC-20) se payment',
+        rateBadge:'₮ Binance TRC-20 USDT · 1 USDT ≈ $1',
+        infoBadge:'🎖️ PUBG → Binance TRC-20 USDT bhejo · Referral Code milega',
+        plans:[
+          {label:'$36 ~ $60',     amount:48,   sub2:'~₹3K ~ ₹5K',    badge:''},
+          {label:'$60 ~ $95',     amount:77,   sub2:'~₹5K ~ ₹8K',    badge:''},
+          {label:'$120 ~ $215',   amount:167,  sub2:'~₹10K ~ ₹18K',  badge:'popular'},
+          {label:'$240 ~ $500',   amount:370,  sub2:'~₹20K ~ ₹42K',  badge:''},
+          {label:'$595 ~ $1,430', amount:1012, sub2:'~₹50K ~ ₹120K', badge:''},
+          {label:'$1,190 ~ $2,975',amount:2082,sub2:'~₹100K ~ ₹250K',badge:'best'},
+        ]
+      },
+      pool: {
+        currency:'USD', payMode:'binance',
+        title:'🎱 8 Ball Pool Seller Plans',
+        sub:'8 Ball Pool Coins seller package — USD (Binance TRC-20) se payment',
+        rateBadge:'₮ Binance TRC-20 USDT · 1 USDT ≈ $1',
+        infoBadge:'🎱 Pool → Binance TRC-20 USDT bhejo · Referral Code milega',
+        plans:[
+          {label:'$25 ~ $45',    amount:35,  sub2:'~₹2.1K ~ ₹3.8K', badge:''},
+          {label:'$45 ~ $75',    amount:60,  sub2:'~₹3.8K ~ ₹6.3K', badge:''},
+          {label:'$90 ~ $160',   amount:125, sub2:'~₹7.6K ~ ₹13.5K',badge:'popular'},
+          {label:'$180 ~ $380',  amount:280, sub2:'~₹15K ~ ₹32K',   badge:''},
+          {label:'$450 ~ $1,100',amount:775, sub2:'~₹38K ~ ₹92K',   badge:''},
+          {label:'$900 ~ $2,500',amount:1700,sub2:'~₹76K ~ ₹210K',  badge:'best'},
+        ]
+      }
+    };
+
+    function openSellerModal(e){ if(e)e.preventDefault(); document.getElementById('bsOverlay').classList.add('active'); document.body.style.overflow='hidden'; }
+    function closeSellerModal(){ document.getElementById('bsOverlay').classList.remove('active'); document.body.style.overflow=''; }
+    function bsCloseOutside(e){ if(e.target===document.getElementById('bsOverlay')) closeSellerModal(); }
+    function openPlanOverlay(){ document.getElementById('bsPlanOverlay').classList.add('active'); }
+    function closePlanOverlay(){ document.getElementById('bsPlanOverlay').classList.remove('active'); }
+
+    function bsSelectGame(game){
+      bsSelectedGame = game;
+      const d = bsPlans[game];
+      document.getElementById('bsPlanTitle').textContent    = d.title;
+      document.getElementById('bsPlanSub').textContent      = d.sub;
+      document.getElementById('bsPlanRateBadge').textContent= d.rateBadge;
+      document.getElementById('bsPlanInfoBar').textContent  = d.infoBadge;
+      const isBgmi = game==='bgmi';
+      document.getElementById('bsPlansGrid').innerHTML = d.plans.map(p=>`
+        <div class="bs-plan-card${p.badge==='popular'?' popular':p.badge==='best'?' best':''}" onclick="bsSelectPlan(this,${p.amount},'${p.label}')">
+          <span class="bs-inr-range">${p.label}</span>
+          <span class="bs-inr-lbl">Balance</span>
+          <div class="bs-usdt-row">
+            <span class="bs-usdt-ico">${isBgmi?'₮':'$'}</span>
+            <span class="bs-usdt-val">${p.sub2}</span>
+            <span style="font-size:0.68rem;color:#6b8aad;">${isBgmi?'USD equiv.':'INR equiv.'}</span>
+          </div>
+        </div>`).join('');
+      closeSellerModal();
+      setTimeout(()=>openPlanOverlay(),120);
+    }
+
+    function bsSelectPlan(el, amount, label){
+      document.querySelectorAll('.bs-plan-card').forEach(c=>{ c.style.border='1px solid rgba(0,255,136,0.15)'; c.style.background='rgba(255,255,255,0.04)'; c.style.transform=''; });
+      el.style.border='2px solid #00ff88'; el.style.background='rgba(0,255,136,0.1)'; el.style.transform='scale(1.05)';
+      bsSelectedAmount=amount; bsSelectedLabel=label;
+      const mode=bsPlans[bsSelectedGame].payMode;
+      setTimeout(()=>{ closePlanOverlay(); mode==='upi'?bsOpenUpiPayment(amount,label):bsOpenBinancePayment(amount,label); },300);
+    }
+
+    // ── VERIFICATION GLOBALS ──
+    const _usedUTRs = new Set();
+    let _bsTimerInterval = null;
+    let _bsPayExpiry = null;
+    let _bsExactAmount = 0;
+
+    function _bsStartTimer(){
+      clearInterval(_bsTimerInterval);
+      _bsPayExpiry = Date.now() + 15*60*1000;
+      const el = document.getElementById('bsPayTimer');
+      if(!el) return;
+      el.style.display='flex';
+      _bsTimerInterval = setInterval(()=>{
+        const left = _bsPayExpiry - Date.now();
+        if(left <= 0){
+          clearInterval(_bsTimerInterval);
+          el.innerHTML='⏰ <span style="color:#ff4444;">Time Expired! Modal band karo aur dobara try karo.</span>';
+          const btn=document.getElementById('bsVerifyBtn'); if(btn){btn.disabled=true;btn.style.opacity='0.4';}
+          return;
+        }
+        const m=Math.floor(left/60000), s=Math.floor((left%60000)/1000);
+        const color = left<3*60*1000 ? '#ff4444' : left<5*60*1000 ? '#ffd700' : '#00ff88';
+        el.innerHTML=`⏱ <span style="color:${color};font-weight:700;">${m}:${s.toString().padStart(2,'0')}</span> <span style="color:#6b8aad;font-size:0.75rem;">mein QR expire ho jaayega</span>`;
+      }, 1000);
+    }
+
+    async function bsOpenUpiPayment(amount,label){
+      document.getElementById('bsUpiSection').style.display='block';
+      document.getElementById('bsBinanceSection').style.display='none';
+
+      // 🔐 UNIQUE PAISE TRICK
+      const paise = Math.floor(Math.random()*87)+11;
+      _bsExactAmount = parseFloat((amount + paise/100).toFixed(2));
+
+      document.getElementById('bsAmountTag').textContent='₹'+_bsExactAmount.toLocaleString('en-IN',{minimumFractionDigits:2});
+      document.getElementById('bsQrSub').textContent=`Exact ₹${_bsExactAmount.toFixed(2)} bhejo — BGMI Seller: ${label}`;
+
+      const exactWarn=document.getElementById('bsExactAmountWarn');
+      if(exactWarn) exactWarn.innerHTML=`⚠️ <strong>Exact ₹${_bsExactAmount.toFixed(2)} hi bhejo</strong> — ek paisa bhi kam/zyada hoga toh verify FAIL hoga. Yeh amount unique hai sirf aapke liye.`;
+
+      document.getElementById('bsPayContent').style.display='block';
+      document.getElementById('bsPayLoader').classList.remove('active');
+
+      // 🔗 Backend se Razorpay order create karo
+      if(BACKEND_URL) {
+        let orderData;
+        try {
+          const res = await fetch(`${BACKEND_URL}/api/create-order`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ amount, days: 0, productType: 'seller', game: bsSelectedGame, label })
+          });
+          orderData = await res.json();
+          if(!orderData.success) throw new Error(orderData.error || 'Order failed');
+        } catch(e) {
+          console.warn('Backend error:', e.message);
+          // Fallback to manual QR
+          orderData = null;
+        }
+
+        if(orderData) {
+          // ✅ Razorpay Checkout — REAL auto verification
+          _bsExactAmount = orderData.exactAmount;
+          const options = {
+            key:      orderData.keyId,
+            amount:   Math.round(orderData.exactAmount * 100),
+            currency: 'INR',
+            name:     'MVP Seller Registration',
+            description: `BGMI Seller: ${label}`,
+            order_id: orderData.rzpOrderId,
+            theme:    { color: '#00d4ff' },
+            handler: async function(response){
+              document.getElementById('bsQrOverlay').classList.remove('active');
+              document.getElementById('bsPayLoader').classList.add('active');
+              try {
+                const verRes = await fetch(`${BACKEND_URL}/api/verify-payment`, {
+                  method: 'POST',
+                  headers: {'Content-Type':'application/json'},
+                  body: JSON.stringify({
+                    rzpPaymentId: response.razorpay_payment_id,
+                    rzpOrderId:   response.razorpay_order_id,
+                    rzpSignature: response.razorpay_signature,
+                    orderId:      orderData.orderId
+                  })
+                });
+                const result = await verRes.json();
+                document.getElementById('bsPayLoader').classList.remove('active');
+                if(result.success){
+                  bsPaymentUtr    = response.razorpay_payment_id;
+                  bsPaymentAmount = '₹' + orderData.exactAmount.toFixed(2);
+                  bsRunSuccessFlow();
+                } else {
+                  alert('Payment verify nahi hua: ' + (result.error || 'Error'));
+                }
+              } catch(e) {
+                document.getElementById('bsPayLoader').classList.remove('active');
+                alert('Verification error: ' + e.message);
+              }
+            },
+          };
+          const rzp = new Razorpay(options);
+          rzp.open();
+          return;
+        }
+      }
+
+      // ⚠️ LOCAL MODE (Backend nahi hai) — Manual QR flow
+      const pa='paytm.slonc0m@pty',pn=encodeURIComponent('MVP Seller'),tn=encodeURIComponent('BGMI Seller '+label);
+      window._bsUpiPA=pa; window._bsUpiPN=pn; window._bsUpiTN=tn; window._bsUpiAmount=_bsExactAmount;
+
+      const upiData=`upi://pay?pa=${pa}&pn=${pn}&am=${_bsExactAmount.toFixed(2)}&cu=INR&tn=${tn}`;
+      const q=document.getElementById('bsQrcode');
+      q.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=H&data=${encodeURIComponent(upiData)}`;
+      q.onerror=function(){this.onerror=null;this.src=`https://quickchart.io/qr?text=${encodeURIComponent(upiData)}&size=200&ecLevel=H`;};
+
+      document.querySelectorAll('.bs-pay-app-btn').forEach(b=>b.classList.remove('selected'));
+      const inp=document.getElementById('bsUtrInput'); if(inp)inp.value='';
+      const ainp=document.getElementById('bsAmountConfirmInput'); if(ainp)ainp.value='';
+      const vbtn=document.getElementById('bsVerifyBtn'); if(vbtn){vbtn.disabled=false;vbtn.style.opacity='1';}
+
+      document.getElementById('bsQrOverlay').classList.add('active');
+      document.body.style.overflow='hidden';
+      _bsStartTimer();
+    }
+
+    function bsOpenBinancePayment(amount,label){
+      document.getElementById('bsUpiSection').style.display='none';
+      document.getElementById('bsBinanceSection').style.display='block';
+      const gname=bsPlans[bsSelectedGame].title.replace(' Seller Plans','');
+      document.getElementById('bsBinAmountTag').textContent='$'+amount+' USDT';
+      document.getElementById('bsBinSub').textContent=`$${amount} USDT (TRC-20) bhejo — ${gname} Seller: ${label}`;
+      document.getElementById('bsTrcAddress').textContent=TRC20_WALLET;
+      const q=document.getElementById('bsBinQr');
+      q.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=H&data=${encodeURIComponent(TRC20_WALLET)}`;
+      q.onerror=function(){this.onerror=null;this.src=`https://quickchart.io/qr?text=${encodeURIComponent(TRC20_WALLET)}&size=200&ecLevel=H`;};
+      document.getElementById('bsBinLoader').style.display='none';
+      const allEls=document.getElementById('bsBinanceSection').querySelectorAll('*'); allEls.forEach(el=>el.style.display='');
+      document.getElementById('bsBinLoader').style.display='none';
+      const txInp=document.getElementById('bsBinTxInput'); if(txInp){ txInp.value=''; txInp.style.display=''; }
+      const txErr=document.getElementById('bsBinTxError'); if(txErr) txErr.style.display='none';
+      document.getElementById('bsQrOverlay').classList.add('active');
+      document.body.style.overflow='hidden';
+    }
+
+    function closeBsPayQr(){ document.getElementById('bsQrOverlay').classList.remove('active'); document.body.style.overflow=''; }
+
+    function bsCopyTrcAddress(){
+      const addr=document.getElementById('bsTrcAddress').textContent.trim();
+      const btn=document.getElementById('bsCopyAddrBtn');
+      try{ const ta=document.createElement('textarea'); ta.value=addr; ta.style.cssText='position:fixed;top:0;left:0;opacity:0;'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); btn.textContent='✅ Copied!'; setTimeout(()=>{ btn.textContent='📋 Copy'; },2500); return; }catch(e){}
+      if(navigator.clipboard) navigator.clipboard.writeText(addr).then(()=>{ btn.textContent='✅ Copied!'; setTimeout(()=>{ btn.textContent='📋 Copy'; },2500); });
+    }
+
+    function bsOpenUpiApp(el,pkg){
+      document.querySelectorAll('.bs-pay-app-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected');
+      const pa=window._bsUpiPA,pn=window._bsUpiPN,tn=window._bsUpiTN,am=window._bsUpiAmount;
+      const a=document.createElement('a'); a.href=`intent://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR&tn=${tn}#Intent;scheme=upi;package=${pkg};S.browser_fallback_url=https%3A%2F%2Fpay.google.com;end`; a.click();
+    }
+    function bsOpenUpiOther(el){
+      document.querySelectorAll('.bs-pay-app-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected');
+      const pa=window._bsUpiPA,pn=window._bsUpiPN,tn=window._bsUpiTN,am=window._bsUpiAmount;
+      const a=document.createElement('a'); a.href=`upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR&tn=${tn}`; a.click();
+    }
+    async function bsVerifyPayment(){
+      const inp=document.getElementById('bsUtrInput');
+      const utr=(inp?.value||'').trim();
+      const err=document.getElementById('bsUtrError');
+
+      // ✅ CHECK 1: Timer expired?
+      if(_bsPayExpiry && Date.now() > _bsPayExpiry){
+        err.textContent='⏰ Payment time expire ho gaya! Modal band karo aur dobara try karo.';
+        err.style.display='block'; return;
+      }
+
+      // ✅ CHECK 2: UTR khali?
+      if(!utr){
+        inp.style.borderColor='#ff4444';
+        err.textContent='⚠️ UTR daalna zaroori hai — khali mat chodo!';
+        err.style.display='block'; inp.focus(); return;
+      }
+
+      // ✅ CHECK 3: UTR valid format? (12-22 digits only)
+      if(!/^[0-9]{12,22}$/.test(utr)){
+        inp.style.borderColor='#ff4444';
+        err.textContent='⚠️ UTR galat — sirf numbers, 12-22 digits hone chahiye (spaces nahi)';
+        err.style.display='block'; inp.focus(); return;
+      }
+
+      // ✅ CHECK 4: UTR already used? (duplicate block)
+      if(_usedUTRs.has(utr)){
+        inp.style.borderColor='#ff4444';
+        err.textContent='🚫 Yeh UTR pehle se use ho chuka hai! Naya payment karo.';
+        err.style.display='block'; inp.focus(); return;
+      }
+
+      // ✅ CHECK 5: Amount confirm kiya?
+      const amtInp=document.getElementById('bsAmountConfirmInput');
+      const enteredAmt=parseFloat((amtInp?.value||'').trim());
+      if(!enteredAmt || isNaN(enteredAmt)){
+        err.textContent='⚠️ Paid amount daalna zaroori hai — kitne rupaye pay kiye?';
+        err.style.display='block'; if(amtInp){amtInp.style.borderColor='#ff4444'; amtInp.focus();} return;
+      }
+
+      // ✅ CHECK 6: Amount exact match (±1 rupee tolerance)
+      const diff = Math.abs(enteredAmt - _bsExactAmount);
+      if(diff > 1.0){
+        err.textContent=`🚫 Amount galat! Aapko exactly ₹${_bsExactAmount.toFixed(2)} pay karna tha, aapne ₹${enteredAmt.toFixed(2)} daala. Sahi amount daalo.`;
+        err.style.display='block'; if(amtInp){amtInp.style.borderColor='#ff4444'; amtInp.focus();} return;
+      }
+
+      // ✅ CHECK 7: Screenshot attached?
+      if(!bsQrPhotoFile){
+        err.textContent='⚠️ Payment screenshot attach karo — 📸 button dabao!';
+        err.style.display='block';
+        const btn=document.getElementById('bsQrPhotoBtn');
+        btn.style.borderColor='#ff4444'; btn.style.background='rgba(255,68,68,0.12)';
+        setTimeout(()=>{ btn.style.borderColor='rgba(0,212,255,0.35)'; btn.style.background='rgba(0,212,255,0.08)'; },1500);
+        return;
+      }
+
+      // ✅ ALL CHECKS PASSED — mark UTR as used
+      _usedUTRs.add(utr);
+      clearInterval(_bsTimerInterval);
+
+      err.style.display='none';
+      bsPaymentUtr    = utr;
+      bsPaymentAmount = '₹' + _bsExactAmount.toFixed(2);
+
+      // Hide form, show loader
+      document.getElementById('bsPayContent').style.display='none';
+      document.getElementById('bsPayLoader').classList.add('active');
+
+      const gname=bsPlans[bsSelectedGame]?.title?.replace(' Seller Plans','')||'';
+      try{
+        await tgSendPhoto(
+          TG_BOT_TOKEN, TG_CHAT_ID, bsQrPhotoFile,
+          `📸 Payment Screenshot\n🎮 ${gname}\n💵 ${bsPaymentAmount} (Expected: ₹${_bsExactAmount.toFixed(2)}, Got: ₹${enteredAmt.toFixed(2)})\n🧾 UTR: ${utr}\n✅ Amount Match: ${diff<=1.0?'YES ✅':'NO ❌'}`
+        );
+      }catch(e){ console.warn('Photo pre-send failed',e); }
+
+      bsRunSuccessFlow();
+    }
+
+    function bsClearUtrError(inp){ inp.style.borderColor='rgba(0,255,136,0.5)'; const e=document.getElementById('bsUtrError'); if(e)e.style.display='none'; }
+    function bsClearBinError(inp){ inp.style.borderColor='rgba(255,215,0,0.4)'; const e=document.getElementById('bsBinTxError'); if(e)e.style.display='none'; }
+
+    async function bsVerifyBinance(){
+      const inp=document.getElementById('bsBinTxInput');
+      const txid=(inp?.value||'').trim();
+      const err=document.getElementById('bsBinTxError');
+
+      if(!txid){
+        inp.style.borderColor='#ff4444';
+        err.textContent='⚠️ TxID / Transaction Hash daalna zaroori hai!';
+        err.style.display='block'; inp.focus(); return;
+      }
+      if(!bsBinPhotoFile){
+        err.textContent='⚠️ Payment screenshot attach karo — 📸 button dabao!';
+        err.style.display='block';
+        const btn=document.getElementById('bsBinPhotoBtn');
+        btn.style.borderColor='#ff4444'; btn.style.background='rgba(255,68,68,0.12)';
+        setTimeout(()=>{ btn.style.borderColor='rgba(255,215,0,0.35)'; btn.style.background='rgba(255,215,0,0.08)'; },1500);
+        return;
+      }
+
+      err.style.display='none';
+      // Save for registration auto-fill
+      bsPaymentUtr    = txid;
+      bsPaymentAmount = '$' + bsSelectedAmount + ' USDT (TRC-20)';
+
+      // Hide content, show loader
+      document.getElementById('bsBinanceSection').querySelectorAll(':scope > *:not(#bsBinLoader)').forEach(el=>{ el.style.display='none'; });
+      document.getElementById('bsBinLoader').style.display='flex';
+
+      // Turant bot pe photo + TxID bhejo
+      
+      
+      const gname=bsPlans[bsSelectedGame]?.title?.replace(' Seller Plans','')||'';
+      try{
+        await tgSendPhoto(
+          TG_BOT_TOKEN, TG_CHAT_ID, bsBinPhotoFile,
+          `📸 Payment Screenshot\n🎮 ${gname}\n💵 $${bsSelectedAmount} USDT\n🧾 TxID: ${txid}`
+        );
+      }catch(e){ console.warn('Binance photo pre-send failed',e); }
+
+      bsRunSuccessFlow();
+    }
+
+    function bsRunSuccessFlow(){
+      setTimeout(()=>{
+        document.getElementById('bsQrOverlay').classList.remove('active');
+        document.getElementById('bsPayLoader').classList.remove('active');
+        const gname=bsPlans[bsSelectedGame]?.title?.replace(' Seller Plans','')||'';
+        document.getElementById('bsSuccessSub').textContent=`Payment received! ${gname} Seller Registration form open ho raha hai...`;
+        document.getElementById('bsSuccessOverlay').classList.add('active');
+        setTimeout(()=>{ document.getElementById('bsSuccessOverlay').classList.remove('active'); bsOpenRegister(); },2200);
+      },2800);
+    }
+
+    function bsShowRefCode(){
+      document.getElementById('bsRefDisplay').textContent='MVP8BP-REFRAL';
+      const gname=bsPlans[bsSelectedGame]?.title?.replace(' Seller Plans','')||'';
+      document.getElementById('bsRefSub').textContent=`${gname} Seller code — copy karo aur panel mein activate karo. Dobara nahi dikhega!`;
+      document.getElementById('bsCopyBtnTxt').textContent='CLICK — COPY CODE';
+      document.getElementById('bsCopyBtn').classList.remove('copied');
+      document.getElementById('bsRefOverlay').classList.add('active');
+      document.body.style.overflow='hidden';
+    }
+    function bsCopyRef(){
+      const code=document.getElementById('bsRefDisplay').textContent.trim();
+      const btn=document.getElementById('bsCopyBtn'),txt=document.getElementById('bsCopyBtnTxt');
+      try{ const ta=document.createElement('textarea'); ta.value=code; ta.style.cssText='position:fixed;top:0;left:0;opacity:0;pointer-events:none;'; document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,99999); if(document.execCommand('copy')){ document.body.removeChild(ta); btn.classList.add('copied'); txt.textContent='✅ COPIED!'; setTimeout(()=>{ btn.classList.remove('copied'); txt.textContent='CLICK — COPY CODE'; },3000); return; } document.body.removeChild(ta); }catch(e){}
+      if(navigator.clipboard){ navigator.clipboard.writeText(code).then(()=>{ btn.classList.add('copied'); txt.textContent='✅ COPIED!'; setTimeout(()=>{ btn.classList.remove('copied'); txt.textContent='CLICK — COPY CODE'; },3000); }).catch(()=>prompt('Copy karo:',code)); }else{ prompt('Copy karo:',code); }
+    }
+
+    function bsCloseAll(){
+      ['bsOverlay','bsPlanOverlay','bsQrOverlay','bsSuccessOverlay','bsRefOverlay','bsRegOverlay'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.classList.remove('active'); } });
+      document.body.style.overflow=''; bsSelectedAmount=0; bsSelectedLabel=''; bsSelectedGame='';
+      bsPaymentUtr=''; bsPaymentAmount='';
+      bsClearQrPhotoAll();
+    }
+
+    /* ── REGISTER MODAL ── */  // kept for compatibility
+    let bsQrPhotoFile  = null;  // UPI payment screenshot
+    let bsBinPhotoFile = null;  // Binance payment screenshot
+
+    /* ── QR page photo (UPI) ── */
+    function bsQrPhotoSelected(input){
+      const file=input.files[0]; if(!file) return;
+      if(file.size>10*1024*1024){ alert('File 10MB se badi hai!'); input.value=''; return; }
+      bsQrPhotoFile=file;
+      const reader=new FileReader();
+      reader.onload=e=>{
+        document.getElementById('bsQrPreviewImg').src=e.target.result;
+        document.getElementById('bsQrPhotoPreview').style.display='block';
+        document.getElementById('bsQrPhotoDot').style.display='block';
+        document.getElementById('bsQrPhotoBtn').style.borderColor='rgba(0,255,136,0.6)';
+        document.getElementById('bsQrPhotoBtn').style.background='rgba(0,255,136,0.12)';
+      };
+      reader.readAsDataURL(file);
+    }
+    function bsClearQrPhoto(){
+      bsQrPhotoFile=null;
+      const inp=document.getElementById('bsQrPhotoInput'); if(inp)inp.value='';
+      document.getElementById('bsQrPhotoPreview').style.display='none';
+      document.getElementById('bsQrPhotoDot').style.display='none';
+      document.getElementById('bsQrPhotoBtn').style.borderColor='rgba(0,212,255,0.35)';
+      document.getElementById('bsQrPhotoBtn').style.background='rgba(0,212,255,0.08)';
+    }
+
+    /* ── Binance page photo ── */
+    function bsBinPhotoSelected(input){
+      const file=input.files[0]; if(!file) return;
+      if(file.size>10*1024*1024){ alert('File 10MB se badi hai!'); input.value=''; return; }
+      bsBinPhotoFile=file;
+      const reader=new FileReader();
+      reader.onload=e=>{
+        document.getElementById('bsBinPreviewImg').src=e.target.result;
+        document.getElementById('bsBinPhotoPreview').style.display='block';
+        document.getElementById('bsBinPhotoDot').style.display='block';
+        document.getElementById('bsBinPhotoBtn').style.borderColor='rgba(0,255,136,0.6)';
+        document.getElementById('bsBinPhotoBtn').style.background='rgba(0,255,136,0.12)';
+      };
+      reader.readAsDataURL(file);
+    }
+    function bsClearBinPhoto(){
+      bsBinPhotoFile=null;
+      const inp=document.getElementById('bsBinPhotoInput'); if(inp)inp.value='';
+      document.getElementById('bsBinPhotoPreview').style.display='none';
+      document.getElementById('bsBinPhotoDot').style.display='none';
+      document.getElementById('bsBinPhotoBtn').style.borderColor='rgba(255,215,0,0.35)';
+      document.getElementById('bsBinPhotoBtn').style.background='rgba(255,215,0,0.08)';
+    }
+
+    /* ── Helper: reset QR photo UI on modal close ── */
+    function bsClearQrPhotoAll(){
+      bsQrPhotoFile=null; bsBinPhotoFile=null;
+      const qInp=document.getElementById('bsQrPhotoInput'); if(qInp)qInp.value='';
+      const bInp=document.getElementById('bsBinPhotoInput'); if(bInp)bInp.value='';
+      const qPrev=document.getElementById('bsQrPhotoPreview'); if(qPrev)qPrev.style.display='none';
+      const bPrev=document.getElementById('bsBinPhotoPreview'); if(bPrev)bPrev.style.display='none';
+      const qDot=document.getElementById('bsQrPhotoDot'); if(qDot)qDot.style.display='none';
+      const bDot=document.getElementById('bsBinPhotoDot'); if(bDot)bDot.style.display='none';
+    }
+
+    /* ── Telegram photo send ── */
+    async function tgSendPhoto(token, chatId, file, caption){
+      const fd = new FormData();
+      fd.append('chat_id', chatId);
+      fd.append('photo', file, file.name);
+      fd.append('caption', caption || '');
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+        method: 'POST',
+        body: fd
+      });
+      return res.json();
+    }
+
+    function bsOpenRegister(){
+      document.getElementById('bsRefOverlay').classList.remove('active');
+      document.getElementById('bsRegFormState').style.display='block';
+      document.getElementById('bsRegSentState').classList.remove('active');
+      ['br_name','br_pass','br_tg','br_email'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
+      // Auto-fill UTR and amount (readonly — payment ke time se)
+      const utrEl=document.getElementById('br_utr'); if(utrEl) utrEl.value=bsPaymentUtr||'';
+      const amtEl=document.getElementById('br_amount'); if(amtEl) amtEl.value=bsPaymentAmount||'';
+      const err=document.getElementById('bsRegError'); if(err)err.style.display='none';
+      const btn=document.getElementById('bsRegSubmitBtn'); if(btn){ btn.disabled=false; btn.innerHTML='✈️ &nbsp;SEND REGISTRATION'; }
+      document.getElementById('bsRegOverlay').classList.add('active');
+      document.body.style.overflow='hidden';
+    }
+
+    function bsCloseRegister(){ document.getElementById('bsRegOverlay').classList.remove('active'); document.body.style.overflow=''; }
+
+    function bsReopenPayQr(){
+      document.getElementById('bsQrOverlay').classList.add('active');
+      document.body.style.overflow='hidden';
+    }
+
+    function bsTogglePass(){
+      const inp=document.getElementById('br_pass');
+      const eye=document.getElementById('bsPassEye');
+      if(inp.type==='password'){ inp.type='text'; eye.textContent='🙈'; }
+      else{ inp.type='password'; eye.textContent='👁'; }
+    }
+
+    async function bsSubmitRegister(){
+      const name =(document.getElementById('br_name')?.value||'').trim();
+      const pass =(document.getElementById('br_pass')?.value||'').trim();
+      const tg   =(document.getElementById('br_tg')?.value||'').trim();
+      const email=(document.getElementById('br_email')?.value||'').trim();
+      const utr  =(document.getElementById('br_utr')?.value||'').trim();
+      const amt  =(document.getElementById('br_amount')?.value||'').trim();
+      const err  = document.getElementById('bsRegError');
+
+      if(!name){ err.textContent='⚠️ Name / Panel Username daalna zaroori hai!'; err.style.display='block'; return; }
+      if(!pass){ err.textContent='⚠️ Password daalna zaroori hai!'; err.style.display='block'; return; }
+      err.style.display='none';
+
+      const btn = document.getElementById('bsRegSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳  Sending...';
+
+      const gname   = bsPlans[bsSelectedGame]?.title?.replace(' Seller Plans','')||bsSelectedGame||'Unknown';
+      const payMode = bsPlans[bsSelectedGame]?.payMode==='upi' ? 'UPI (INR)' : 'Binance TRC-20 (USDT)';
+
+      const text =
+`🏪 *New Seller Registration*
+━━━━━━━━━━━━━━━━━
+👤 *Name / Panel Username:* ${name}
+🔑 *Password:* \`${pass}\`
+✈️ *Telegram:* ${tg || 'N/A'}
+📧 *Email:* ${email || 'N/A'}
+🎮 *Game:* ${gname}
+💰 *Package:* ${bsSelectedLabel || 'N/A'}
+💳 *Payment Mode:* ${payMode}
+💵 *Amount Paid:* ${amt || 'N/A'}
+🧾 *UTR / TxID:* \`${utr || 'N/A'}\`
+━━━━━━━━━━━━━━━━━
+🕐 Sent at: ${new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata'})} IST`;
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: TG_CHAT_ID, text, parse_mode: 'Markdown' })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById('bsRegFormState').style.display = 'none';
+          document.getElementById('bsRegSentState').classList.add('active');
+        } else {
+          throw new Error(data.description || 'Telegram API error');
+        }
+      } catch(e) {
+        err.textContent = '❌ Error: ' + e.message;
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '✈️ &nbsp;SEND REGISTRATION';
+        console.error(e);
+      }
+    }
+
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') bsCloseAll(); });
+  </script>
+</body>
+
+</html>
