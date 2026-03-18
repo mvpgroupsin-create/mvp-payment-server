@@ -8,12 +8,14 @@ const cors    = require("cors");
 const app     = express();
 
 app.use(cors());
-app.use(express.static("public"));
 
-// ⚠️ Webhook ke liye raw body chahiye — JSON se pehle
+// ⚠️ Webhook ke liye raw body chahiye — sabse pehle
 app.use("/api/razorpay-webhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Static files — API routes ke baad
+app.use(express.static("public"));
 
 // ══════════════════════════════════════════
 //  ⚙️ CONFIG — Railway Variables se aayega
